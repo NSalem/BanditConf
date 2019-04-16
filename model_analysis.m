@@ -40,15 +40,22 @@ QdiffM = Qdiff_all-Pdiff;
 
 
 %% plot average difference between Q-value difference and mean difference accross time
+
+
+modelcolors = [.5,.5,.5;
+1,0,0;
+0,0,1;
+1,0,1];
+
+modelcolors = [
+    127,127,127;
+202,0,32;
+5,113,176;
+94,60,153]/255;
+
 figure()
 % plot(mean(Pr'-Pl'),'k')
 hold on
-
-modelcolors = [228,26,28
-55,126,184;
-77,175,74
-152,78,163]/255;
-
 for imodel = 1:size(myQ,1)
     s = shadedErrorBar([1:240],squeeze(mean(QdiffM(imodel,:,:),2)),squeeze(std(QdiffM(imodel,:,:),[],2)./sqrt(size(Choices,2))))
     s.mainLine.Color = modelcolors(imodel,:);
@@ -58,7 +65,10 @@ for imodel = 1:size(myQ,1)
 end
 
 % %% plot probability of choosing door 2 
-% legend({'1 \alpha_Q, 1 \alpha_V','2 \alpha_Q, 1 \alpha_V','1 \alpha_Q, 2 \alpha_V','2 \alpha_Q, 2 \alpha_V'})
+modellabels = {'1 \alpha_Q, 1 \alpha_V','2 \alpha_Q, 1 \alpha_V','1 \alpha_Q, 2 \alpha_V','2 \alpha_Q, 2 \alpha_V'};
+legend(modellabels)
+xlabel('Trial number')
+ylabel('(Q_2-Q_1) - (\mu_2-\mu_1)')
 % figure()
 % plot(c2,'k')
 % hold on
@@ -140,14 +150,21 @@ for ivb = 1:2
             s = shadedErrorBar([1:25],squeeze(pcmean(imodel,ivb,ivg,:)),squeeze(pcse(imodel,ivb,ivg,:)));
             s.mainLine.Color = modelcolors(imodel,:);
             s.mainLine.LineWidth = 3;
-%             s.edge.delete;
+            s.edge.delete;
             s.patch.FaceColor = modelcolors(imodel,:);
             s.patch.FaceAlpha = 0.6;
             s.patch.EdgeColor = modelcolors(imodel,:);
+            s.patch.EdgeAlpha = 1;
 %             s.edge.Color
         end
+        xlabel('Trial')
+        ylabel('p correct')
     end
 end
+
+legend({'data',modellabels{:}})
+
+
 condcolors = [6  95  37; 
         143 202 51;
         155 136 21;
@@ -171,15 +188,16 @@ modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 figure()
 % errorbar(corrcond_m(:),corrcond_se(:))
 
-pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1.1,12,'','','')
+pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1.1,12,'','Condition','p correct')
 hold on
 plot([0,5],[.5,.5],':k')
-
+xticklabels({'vLvL','vLvH','vHvL','vHvH'})
 for imodel = 1:4
     for ibar = 1:4
-        errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar),modelse(imodel,ibar),'ko')
+        y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar),modelse(imodel,ibar),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
     end
 end
+legend(y,modellabels, 'Location', 'southeastoutside')
 % hold on
 % shadedErrorBar([1:240],squeeze(Q(1,2,1:240)),sqrt(squeeze(V(1,2,1:240))))
 
@@ -197,20 +215,22 @@ modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % errorbar(corrcond_m(:),corrcond_se(:))
 
  %% plot confidence accross conditions
+ modelmarkers = {'x','d','s','o'}
 figure()
-pirateplot(mconfcon,repmat(condcolors,4,1),1,6,12,'','','')
+pirateplot(mconfcon,repmat(condcolors,4,1),1,6,12,'','Condition','p correct')
+xticklabels({'vLvL','vLvH','vHvL','vHvH'})
 hold on
 % plot([0,5],[.5,.5],':k')
 for imodel = 1:4
     for ibar = 1:4
-        errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar)*6,modelse(imodel,ibar)*6,'ko')
+        y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar)*6,modelse(imodel,ibar)*6,['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
     end
 end
-
+legend(y,modellabels, 'Location', 'southeastoutside')
 
 %% plot calibration
 figure()
-pirateplot(mconfcon/6-mcorrcon,repmat(condcolors,4,1),-.5,.5,12,'','','')
+pirateplot(mconfcon/6-mcorrcon,repmat(condcolors,4,1),-.5,.5,12,'','Condition','Confidence-Accuracy')
 hold on
 plot([0,5],[0,0],':k')
-
+xticklabels({'vLvL','vLvH','vHvL','vHvH'})

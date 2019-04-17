@@ -27,7 +27,12 @@ Here I test several Q-learning models to explain choice and confidence. As in so
 
 <img src="./model1_Q.PNG">
 
+Where Q is the trial-by-treal belief about the mean of each option
+
+
 <img src="./model1_V.PNG">
+
+Where V is the trial-by-treal belief about the variance of each option
 
 In principle I assume choice and confidence based on [Thompson sampling (Thompson, 1933)](https://www.dropbox.com/s/yhn9prnr5bz0156/1933-thompson.pdf), i.e. the probability of choosing option A matches the probability that A it gives a higher reward than B. 
 

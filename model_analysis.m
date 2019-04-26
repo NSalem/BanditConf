@@ -217,7 +217,7 @@ modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
  %% plot confidence accross conditions
  modelmarkers = {'x','d','s','o'}
 figure()
-pirateplot(mconfcon,repmat(condcolors,4,1),1,6,12,'','Condition','p correct')
+pirateplot(mconfcon,repmat(condcolors,4,1),1,6,12,'','Condition','Confidence')
 xticklabels({'vLvL','vLvH','vHvL','vHvH'})
 hold on
 % plot([0,5],[.5,.5],':k')

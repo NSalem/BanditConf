@@ -23,8 +23,13 @@ modelsinfo{4}.lb = [0,0,0,0];
 modelsinfo{4}.ub = [1,1,1,1];
 modelsinfo{4}.x0 = [.5,.5,.5,.5];
 
+modelsinfo{5}.paramnames = {'lrm','lrv','lambda','T'}
+modelsinfo{5}.lb = [0,0,0,0];
+modelsinfo{5}.ub = [1,1,1,100];
+modelsinfo{5}.x0 = [.5,.5,.5,50];
+modelsinfo{5}.drift = true;
 options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
-for imodel = 1:numel(modelsinfo) 
+for imodel = 5%1:numel(modelsinfo) 
     lb = modelsinfo{imodel}.lb;
     ub = modelsinfo{imodel}.ub;
     x0 = modelsinfo{imodel}.x0;

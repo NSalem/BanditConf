@@ -7,6 +7,9 @@ classdef    qLearner < handle
         lrv
         lrm2
         lrv2
+        lambda = 1;
+        T
+        drift = false;
         V
         Q
         s = [];
@@ -78,6 +81,10 @@ classdef    qLearner < handle
                 obj.Q(s,a) = obj.Q(s,a) + obj.lrm.*delta;                                     % the delta rule for the factual choice
             end
 
+            %% drift Q unchosen towards T 
+            if isprop(obj,'T') && ~isempty(obj,'T') && obj.drift
+                obj.Q(s,3-a) = obj.Q(s,3-a) + obj.lrm.*(obj.T - obj.Q(s,3-a));                                     % the delta rule for the factual choice
+            end
             %%
             obj.s = [obj.s s];
             obj.r = [obj.r r];
@@ -89,8 +96,16 @@ classdef    qLearner < handle
 
         end
         
+
+        function [action,p] = chooseAction(obj,state) 
+            if isprop(obj,'T') && ~isempty(obj.T) 
+                [action,p] = chooseActionThresholdSigmoid(obj,state);
+            else 
+                [action,p] = chooseActionThompson(obj,state);
+            end
+        end
     
-            function [action,p] = chooseActionThompson(obj, state)
+        function [action,p] = chooseActionThompson(obj, state)
                     %state: number representing state
                     %
                     %Outputs:
@@ -148,6 +163,39 @@ classdef    qLearner < handle
                 p = 1-pc;
             end
         end
+        
+        function [action,p] = chooseActionThresholdSigmoid(obj, state)
+                %state: number representing state
+                %
+                %Outputs:
+                %action: (1 or 2)
+                %p: Probability of having chosen action based on the state
+
+           if state>size(obj.Q,1)
+                obj.Q(state, 1:2) = obj.startQ;
+                obj.V(state,1:2) = obj.startV;
+           end
+           
+           Q2 = obj.Q(state,2);
+           Q1 = obj.Q(state,1);
+           V2 = obj.V(state,2);
+           V1 = obj.V(state,1);
+           
+           SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(obj.lambda.*x).*exp(-((x-Q2)/(2.*V2)))),obj.T, Inf)
+           SP1 = (1/sqrt(2*pi*V1))*integral(@(x)(-exp(obj.lambda*x).*exp(-((x-Q1)/2*V1))),obj.T, Inf)
+
+           dQ = SP2 - SP1; % correct vs incorrect
+           
+           pc = 1./(1+exp(-dQ.*obj.beta));
+           action = double(rand<pc) + 1;
+        
+           if action == 2
+                p = pc;
+            else
+                p = 1-pc;
+            end
+        end
+
     end
     methods (Static)
     end

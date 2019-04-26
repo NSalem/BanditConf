@@ -16,7 +16,7 @@ lik     = 0;   % loglikelihood
 for i = 1:length(a)
     
     if ~isnan(a(i))
-        [action,p] = l.chooseActionThomson(s(i));
+        [action,p] = l.chooseAction(s(i));
         if action ~=a(i)
             p = 1-p;
         end

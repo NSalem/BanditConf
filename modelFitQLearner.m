@@ -1,4 +1,6 @@
 LoadExp1;
+addpath('ModelingFuncs\')
+addpath('helperfuncs');
 
 Choices = Choices + 2;
 Choices(Choices==3) = 2;

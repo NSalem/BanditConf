@@ -1,4 +1,5 @@
 addpath('ModelingFuncs\')
+addpath('helperfuncs');
 load('model_fits');
 LoadExp1;
 ChoicesOrig = Choices;

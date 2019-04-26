@@ -1,4 +1,6 @@
 LoadExp1;
+addpath('ModelingFuncs\')
+addpath('helperfuncs');
 
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
@@ -23,7 +25,7 @@ modelsinfo{4}.lb = [0,0,0,0];
 modelsinfo{4}.ub = [1,1,1,1];
 modelsinfo{4}.x0 = [.5,.5,.5,.5];
 
-options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
+options = optimset('Algorithm', 'interior-point', 'Display', 'final', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
 for imodel = 1:numel(modelsinfo) 
     lb = modelsinfo{imodel}.lb;
     ub = modelsinfo{imodel}.ub;

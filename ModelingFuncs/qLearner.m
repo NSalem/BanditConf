@@ -1,18 +1,17 @@
 classdef    qLearner < handle
     properties 
-        startQ = [0,0];
-        startV = [0,0];
+%         startQ = [0,0];
+%         startV = [0,0];
         beta
         lrm
         lrv
         lrm2
         lrv2
-        lambda = 1;
+        lambda = 0;
         T
         drift = false;
-        V
-        Q
-        s = [];
+        Q = [0,0];
+        V = [0,0];
         r = [];
         c = [];
         confirmatory
@@ -50,75 +49,54 @@ classdef    qLearner < handle
 %         end
     end
     
-        function learn(obj, s, a, r)
-            %%% updates prior distributions for value of the chosen (and
-            %%% unchosen option if u is given), as well as the context
-            %%% value if obj.relative is true
-            %%% s: integer indicating current state
+        function learn(obj, a, r)
+            %%% updates prior distributions of value
             %%% a: integer (1 or 2) indicating the action taking this
             %%% trial
-            %%% r: (float) reward 
+            %%% r: (integer) reward  
             
-            if s>size(obj.Q,1)%||a>size(obj.Q,2)
-                obj.Q(s, :) = obj.startQ;
-            end
-            if s>size(obj.V,1)%||a>size(obj.Q,2)
-                obj.V(s, :) = [0,0];
-            end
-    
-            delta =  r - obj.Q(s,a);                                        % the prediction error for the factual choice
+            delta =  r - obj.Q(a);                                       
 
             %% update var
-            if obj.Q(s,a)~=0
-                deltaV = ((r - obj.Q(s,a))^2 -obj.V(s,a)); 
-                obj.V(s,a) = obj.V(s,a) + obj.lrv.*deltaV.*double(delta>0) + obj.lrv2.*deltaV.*double(delta<0);
+            if obj.Q(a)~=0
+                deltaV = ((r - obj.Q(a))^2 -obj.V(a)); 
+                obj.V(a) = obj.V(a) + obj.lrv.*deltaV.*double(delta>0) + obj.lrv2.*deltaV.*double(delta<0);
             end
             %% udapte mean 
             
             if obj.confirmatory 
-                obj.Q(s,a) = obj.Q(s,a) + obj.lrm.*delta.*double(delta>0) + obj.lrm2.*delta.*double(delta<0);                                     % the delta rule for the factual choice             
+                obj.Q(a) = obj.Q(a) + obj.lrm.*delta.*double(delta>0) + obj.lrm2.*delta.*double(delta<0);                                     % the delta rule for the factual choice             
             else
-                obj.Q(s,a) = obj.Q(s,a) + obj.lrm.*delta;                                     % the delta rule for the factual choice
+                obj.Q(a) = obj.Q(a) + obj.lrm.*delta;                                     % the delta rule for the factual choice
             end
 
             %% drift Q unchosen towards T 
-            if isprop(obj,'T') && ~isempty(obj,'T') && obj.drift
-                obj.Q(s,3-a) = obj.Q(s,3-a) + obj.lrm.*(obj.T - obj.Q(s,3-a));                                     % the delta rule for the factual choice
+            if isprop(obj,'T') && ~isempty(obj.T) && obj.drift
+                obj.Q(3-a) = obj.Q(3-a) + obj.lrm.*(obj.T - obj.Q(3-a));                                     % the delta rule for the factual choice
             end
             %%
-            obj.s = [obj.s s];
             obj.r = [obj.r r];
-            if nargin>4
-                obj.c = [obj.c c];
-            else 
-                obj.c = [obj.c NaN];
-            end
-
+            
         end
         
 
-        function [action,p] = chooseAction(obj,state) 
+        function [action,p] = chooseAction(obj) 
             if isprop(obj,'T') && ~isempty(obj.T) 
-                [action,p] = chooseActionThresholdSigmoid(obj,state);
+                [action,p] = chooseActionThresholdSigmoid(obj);
             else 
-                [action,p] = chooseActionThompson(obj,state);
+                [action,p] = chooseActionThompson(obj);
             end
         end
     
-        function [action,p] = chooseActionThompson(obj, state)
+        function [action,p] = chooseActionThompson(obj)
                     %state: number representing state
                     %
                     %Outputs:
                     %action: (1 or 2)
                     %p: Probability of having chosen action based on the state
 
-               if state>size(obj.Q,1)
-                    obj.Q(state, :) = obj.startQ;
-                    obj.V(state,:) = obj.startV;
-               end
-
-                Q1 = randn(1000, 1,1)*sqrt(obj.V(state,1))+obj.Q(state,1); %sampled values from current prior distribution of option1
-                Q2 = randn(1000, 1,1)*sqrt(obj.V(state,2))+obj.Q(state,2); %sampled values from current prior distribution of option2
+                Q1 = randn(1000, 1,1)*sqrt(obj.V(1))+obj.Q(1); %sampled values from current prior distribution of option1
+                Q2 = randn(1000, 1,1)*sqrt(obj.V(2))+obj.Q(2); %sampled values from current prior distribution of option2
 
             %     f = @(x) normpdf(x,priorMean1,sqrt(priorVar1)).*(4-normcdf(x,priorMean2,sqrt(priorVar2)));
             %     conf2 = integral(f,-4,4);
@@ -138,19 +116,15 @@ classdef    qLearner < handle
                 end
         end
         
-        function [action,p] = chooseActionSigmoid(obj, state)
+        function [action,p] = chooseActionSigmoid(obj)
                 %state: number representing state
                 %
                 %Outputs:
                 %action: (1 or 2)
                 %p: Probability of having chosen action based on the state
-
-           if state>size(obj.Q,1)
-                obj.Q(state, 1:2) = obj.startQ;
-           end
-           
-           Q2 = obj.Q(state,2);
-           Q1 = obj.Q(state,1);
+      
+           Q2 = obj.Q(2);
+           Q1 = obj.Q(1);
            
            dQ = Q2 - Q1; % correct vs incorrect
            
@@ -164,28 +138,24 @@ classdef    qLearner < handle
             end
         end
         
-        function [action,p] = chooseActionThresholdSigmoid(obj, state)
-                %state: number representing state
-                %
+        function [action,p] = chooseActionThresholdSigmoid(obj)
                 %Outputs:
                 %action: (1 or 2)
-                %p: Probability of having chosen action based on the state
-
-           if state>size(obj.Q,1)
-                obj.Q(state, 1:2) = obj.startQ;
-                obj.V(state,1:2) = obj.startV;
-           end
+                %p: Probability of having chosen action 
            
-           Q2 = obj.Q(state,2);
-           Q1 = obj.Q(state,1);
-           V2 = obj.V(state,2);
-           V1 = obj.V(state,1);
+           Q2 = obj.Q(2);
+           Q1 = obj.Q(1);
+           V2 = obj.V(2);
+           V1 = obj.V(1);
            
-           SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(obj.lambda.*x).*exp(-((x-Q2)/(2.*V2)))),obj.T, Inf)
-           SP1 = (1/sqrt(2*pi*V1))*integral(@(x)(-exp(obj.lambda*x).*exp(-((x-Q1)/2*V1))),obj.T, Inf)
+%             integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V)))),-Inf,Inf)/sqrt(2*pi*V)
+           SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q2).^2./(2.*V2)))),obj.T, Inf);
+           SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q1).^2./(2.*V1)))),obj.T, Inf);
 
            dQ = SP2 - SP1; % correct vs incorrect
-           
+           if isnan(dQ)
+               dQ = 0;
+           end
            pc = 1./(1+exp(-dQ.*obj.beta));
            action = double(rand<pc) + 1;
         

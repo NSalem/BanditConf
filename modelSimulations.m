@@ -6,7 +6,7 @@ clear
 close all
 addpath('ModelingFuncs\');
 addpath('helperfuncs\')
-outfilename = 'model_simulations_results';
+outfilename = 'model_simulations_results.mat';
 loadExp1; %load experiment 1 to use the same probability distributions for outcomes
 
 n_sims      = 50;
@@ -112,7 +112,7 @@ for isim = 1:n_sims
 
                 if igenmodel == n_models && irecmodel == n_models
                     kk=kk+1;
-                    corr_mat(isub,:,:) = transpose(squeeze(mean(reshape((a-1)',ntrials,4,n_sess),3)));
+%                     corr_mat(isub,:,:) = transpose(squeeze(mean(reshape((a-1)',ntrials),3)));
                     %                 corr_mat(isub,:,:) = squeeze(nanmean(reshape((a-1)',3,4,ntrials),1));
 %                     con_mat(isub,:,:) = transpose(squeeze(mean(reshape(conf',ntrials,4,n_sess),3)));
                     %con_mat(isub,:,:) = squeeze(nanmean(reshape(conf(:)',3,4,ntrials),1));
@@ -152,11 +152,11 @@ for isim = 1:n_sims
             end
         end
     end
-    save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP', 'LAME', 'parametersLPP', 'parameters', 'genparams','corr_mat','con_mat', 'regress', 'ntrials', 'n_sims', 'modelsinfo','-append')
+    save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP', 'parametersLPP', 'genparams', 'ntrials', 'n_sims', 'modelsinfo','-append')
 end
 
-con_mat2 = (con_mat-max(con_mat(:)))/((max(con_mat(:))-min(con_mat(:))))*(1-0.5)+1;%green = '\color[rgb]{0,1,0}'
+% con_mat2 = (con_mat-max(con_mat(:)))/((max(con_mat(:))-min(con_mat(:))))*(1-0.5)+1;%green = '\color[rgb]{0,1,0}'
 n_sub_all = size(corr_mat,1);
 
-save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP', 'LAME', 'parametersLPP', 'parameters', 'genparams','corr_mat','con_mat', 'regress', 'ntrials', 'n_sims', 'modelsinfo')
+save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP','parametersLPP', 'genparams','ntrials', 'n_sims', 'modelsinfo')
 

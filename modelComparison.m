@@ -1,4 +1,4 @@
-load('model_fits');
+load('Results\model_fits');
 LoadExp1;
 
     n_trials = size(Choices,1);

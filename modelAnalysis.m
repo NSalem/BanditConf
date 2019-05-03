@@ -1,28 +1,28 @@
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-load('model_fits');
-LoadExp1;
+load('Results\model_fitsMLE_exp1');
+loadExp1;
 ChoicesOrig = Choices;
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
 
 %% get model accuracy and conf per condition
-for imodel  = 1:size(parameters, 2)
+for imodel  = 1:numel(parameters)
     for isub = 1:size(Choices,2)
         paramstruct = modelsinfo{imodel};
             for iparam = 1:numel(modelsinfo{imodel}.paramnames)
-                paramstruct.(modelsinfo{imodel}.paramnames{iparam}) = parameters{isub,imodel}(iparam);
+                paramstruct.(modelsinfo{imodel}.paramnames{iparam}) = parameters{imodel}(isub,iparam);
             end
-       [Q,V,pc,PE] = Computational_TimeSeries_QLearner(paramstruct,ones(240,isub),Choices(:,isub),Reward(:,isub));    
+       [Q,V,pc,PE] = Computational_TimeSeries_QLearner(paramstruct,Choices(:,isub),Reward(:,isub));    
         pc_all(imodel,isub,:) = pc;
-        Q_all(imodel,isub,:,:,:)= Q;
-        V_all(imodel,isub,:,:,:)= V;
-        PE_all(imodel,isub,:,:,:)= PE;
+        Q_all(imodel,isub,:,:)= Q;
+        V_all(imodel,isub,:,:)= V;
+        PE_all(imodel,isub,:,:)= PE;
 
     end  
 end
 
-Qdiff_all = squeeze(Q_all(:,:,:,2,1:240)-Q_all(:,:,:,1,1:240));
+Qdiff_all = squeeze(Q_all(:,:,2,1:240)-Q_all(:,:,1,1:240));
 corr = double(sign(ChoicesOrig) == sign(Pr-Pl));
 corr(Pr == Pl) = NaN;
 
@@ -35,7 +35,7 @@ mpc2 = squeeze(mean(pc_all,2)); %probability of choosing door 2
 sepc2 = squeeze(std(pc_all,[],2))./sqrt(size(Choices,2)); %probability of choosing door 2
 
 
-Pdiff = repmat((Pr'-Pl'),1,1,4);
+Pdiff = repmat((Pr'-Pl'),1,1,5);
 Pdiff = permute(Pdiff,[3,1,2]);
 QdiffM = Qdiff_all-Pdiff;
 
@@ -43,16 +43,19 @@ QdiffM = Qdiff_all-Pdiff;
 %% plot average difference between Q-value difference and mean difference accross time
 
 
-modelcolors = [.5,.5,.5;
-1,0,0;
-0,0,1;
-1,0,1];
+% modelcolors = [.5,.5,.5;
+% 1,0,0;
+% 0,0,1;
+% 1,0,1;
+% 0,1,0];
 
 modelcolors = [
     127,127,127;
 202,0,32;
 5,113,176;
-94,60,153]/255;
+94,60,153;
+100,200,0;
+]/255;
 
 figure()
 % plot(mean(Pr'-Pl'),'k')
@@ -110,7 +113,7 @@ for ivb = 1:numel(vars)
             conf_cond(ivb,ivg,isub,1:25) =ConfSubCond;
 
 
-            for imodel = 1:4
+            for imodel = 1:5
                 pc2 = squeeze(pc_all(imodel, isub,sel));
                 pcorr = squeeze(pc2.*(Pr(sel,isub)>Pl(sel,isub))+(1.-pc2).*(Pr(sel,isub)<Pl(sel,isub)));
                 model_pc_cond(imodel,ivb,ivg,isub,:) = pcorr ;
@@ -147,7 +150,7 @@ for ivb = 1:2
 %         shadedErrorBar([1:25],squeeze(corrmean(ivb,ivg,:)),squeeze(corrse(ivb,ivg,:)));
         errorbar([1:25],squeeze(corrmean(ivb,ivg,:)),squeeze(corrse(ivb,ivg,:)),':k');
         ylim([.4,1])
-        for imodel = 1:4
+        for imodel = 1:5
             s = shadedErrorBar([1:25],squeeze(pcmean(imodel,ivb,ivg,:)),squeeze(pcse(imodel,ivb,ivg,:)));
             s.mainLine.Color = modelcolors(imodel,:);
             s.mainLine.LineWidth = 3;
@@ -177,11 +180,12 @@ condcolors = [6  95  37;
 
 
 %% plot avg accuracy per condition
+ modelmarkers = {'x','d','s','o','^'}
 mcorrcon = squeeze(mean(corr_cond,4));
 mcorrcon = reshape(mcorrcon,4,65);
 
 mmodelpccon = mean(model_pc_cond,5);
-mmodelpccon = reshape(mmodelpccon,4,4,65);
+mmodelpccon = reshape(mmodelpccon,5,4,65);
 modelmean = squeeze(mean(mmodelpccon,3));
 modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % std(pcmean,[]/4)/sqrt(size;
@@ -193,7 +197,7 @@ pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1.1,12,'','Condition','p correct')
 hold on
 plot([0,5],[.5,.5],':k')
 xticklabels({'vLvL','vLvH','vHvL','vHvH'})
-for imodel = 1:4
+for imodel = 1:5
     for ibar = 1:4
         y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar),modelse(imodel,ibar),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
     end
@@ -208,7 +212,7 @@ mconfcon = squeeze(mean(conf_cond,4));
 mconfcon = reshape(mconfcon,4,65);
 
 mmodelpccon = mean(model_pc_cond,5);
-mmodelpccon = reshape(mmodelpccon,4,4,65);
+mmodelpccon = reshape(mmodelpccon,5,4,65);
 modelmean = squeeze(mean(mmodelpccon,3));
 modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % std(pcmean,[]/4)/sqrt(size;
@@ -216,13 +220,12 @@ modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % errorbar(corrcond_m(:),corrcond_se(:))
 
  %% plot confidence accross conditions
- modelmarkers = {'x','d','s','o'}
 figure()
 pirateplot(mconfcon,repmat(condcolors,4,1),1,6,12,'','Condition','Confidence')
 xticklabels({'vLvL','vLvH','vHvL','vHvH'})
 hold on
 % plot([0,5],[.5,.5],':k')
-for imodel = 1:4
+for imodel = 1:5
     for ibar = 1:4
         y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar)*6,modelse(imodel,ibar)*6,['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
     end

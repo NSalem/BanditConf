@@ -1,13 +1,13 @@
-load('Results\model_fits');
-LoadExp1;
+load('Results\model_fitsMLE_exp1');
+% loadExp1;
 
     n_trials = size(Choices,1);
     nfpm = [];
-    for imodel = 1:size(parameters,2)
-        nfpm = [nfpm,numel(parameters{1,imodel})];
+    for imodel = 1:numel(parameters)
+        nfpm = [nfpm,size(parameters{imodel},2)];
     end
     %kk = 0;
-    for n= 1:size(parameters,2);
+    for n= 1:numel(parameters);
     %    kk = kk+1;
         bic(:,n)=-2*-ll(:,n)+nfpm(n)*log(n_trials); % l2 is already positive
     %     aic_this_exp(:,n)=-2*-ll(:,n)+2*nfpm(n);
@@ -17,5 +17,5 @@ LoadExp1;
     %     post{ifile} = postBMC.r;
     %     postratio{ifile} = ((postBMC.r(2,:)-postBMC.r(1,:))./(postBMC.r(2,:)+postBMC.r(1,:)))';
     
-    [postBMC,outBMC]  = VBA_groupBMC(-bic'/2);
+    [postBMC,outBMC]  = VBA_groupBMC(-bic(:,[3,5])'/2);
 

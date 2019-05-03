@@ -21,17 +21,18 @@ modelsinfo{4}.x0 = [.5,.5,.5,.5];
 modelsinfo{5}.paramnames = {'lrm','lrv','lambda','T','beta'}
 modelsinfo{5}.lb = [0,0,0,0,0];
 modelsinfo{5}.ub = [1,1,Inf,100,Inf];
-modelsinfo{5}.x0 = [.5,0,1,50,1];
+modelsinfo{5}.x0 = [.5,.5,1,50,1];
 modelsinfo{5}.drift = true;
 
 
 priorfuncs.beta = '@(x) log(gampdf(x,1.2,5))';
+% priorfuncs.beta = '@(x) log(gampdf(x,1.29,2.03))';
 priorfuncs.lrm = '@(x) log(betapdf(x,1.1,1.1))';
 priorfuncs.lrm2 = priorfuncs.lrm; 
 priorfuncs.lrv = priorfuncs.lrm; 
 priorfuncs.lrv2 = priorfuncs.lrm; 
 priorfuncs.T = '@(x) log(betapdf(x/100,1.1,1.1))';
-priorfuncs.lambda = '@(x) log(betapdf(x,1.1,1.1))';
+priorfuncs.lambda = '@(x) log(gampdf(x,.08,41.46))';
     
 for imodel = 1:numel(modelsinfo)
     for iparam = 1:numel(modelsinfo{imodel}.paramnames)

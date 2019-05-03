@@ -149,10 +149,20 @@ classdef    qLearner < handle
            V1 = obj.V(1);
            
 %             integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V)))),-Inf,Inf)/sqrt(2*pi*V)
-           SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q2).^2./(2.*V2)))),obj.T, Inf);
-           SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q1).^2./(2.*V1)))),obj.T, Inf);
+%            SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q2).^2./(2.*V2)))),obj.T, Inf);
+%            SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q1).^2./(2.*V1)))),obj.T, Inf);                 
+           SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x-Q2).^2./(2.*V2))))),obj.T, Inf);
+           SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x-Q1).^2./(2.*V1))))),obj.T, Inf);
+           
+%            T1 = (obj.T-Q1)./V1;
+%            T2 = (obj.T-Q2)./V2;
+%            
+%            SP2 = (1/sqrt(2*pi)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x).^2./(2))))),T2, Inf);
+%            SP1 = (1/sqrt(2*pi)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x).^2./(2))))),T1, Inf);
+%             
 
-           dQ = SP2 - SP1; % correct vs incorrect
+           
+           dQ = (abs(SP2)-abs(SP1))./(abs(SP1)+abs(SP2));
            if isnan(dQ)
                dQ = 0;
            end

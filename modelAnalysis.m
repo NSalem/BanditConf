@@ -1,6 +1,6 @@
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-load('Results\model_fitsMLE_exp1');
+load('Results\model_fitsMLE_exp1OLD.mat');
 loadExp1;
 ChoicesOrig = Choices;
 Choices = Choices + 2;
@@ -23,8 +23,8 @@ for imodel  = 1:numel(parameters)
 end
 
 Qdiff_all = squeeze(Q_all(:,:,2,1:240)-Q_all(:,:,1,1:240));
-corr = double(sign(ChoicesOrig) == sign(Pr-Pl));
-corr(Pr == Pl) = NaN;
+corrchoice = double(sign(ChoicesOrig) == sign(Pr-Pl));
+corrchoice(Pr == Pl) = NaN;
 
 c2 = nanmean(Choices==2,2); %proportion of choosing door2
 myQ = squeeze(mean(Q_all,2)); %mean q values 
@@ -133,48 +133,62 @@ end
 
 [selr,c] = find(~isinf(BIC));%
 BIC = BIC(selr,:); 
-corrmean = squeeze(mean(corr_cond,3));
-corrse = squeeze(std(corr_cond,[],3)/sqrt(size(corr_cond,3)));
+measureMean = squeeze(mean(corr_cond,3));
+measureSe = squeeze(std(corr_cond,[],3)/sqrt(size(conf_cond,3)));
+confmean = squeeze(mean(corr_cond,3));
+confse = squeeze(std(corr_cond,[],3)/sqrt(size(conf_cond,3)));
 pcmean  =squeeze(mean(model_pc_cond,4));
 pcse = squeeze(std(model_pc_cond,[],4)/sqrt(size(model_pc_cond,4)));
 
 
 %% plot timecourse per condition 
 
-figure()
-i = 0;
-for ivb = 1:2
-    for ivg = 1:2
-        i= i+1;
-        subplot(2,2,i)
-%         shadedErrorBar([1:25],squeeze(corrmean(ivb,ivg,:)),squeeze(corrse(ivb,ivg,:)));
-        errorbar([1:25],squeeze(corrmean(ivb,ivg,:)),squeeze(corrse(ivb,ivg,:)),':k');
-        ylim([.4,1])
-        for imodel = 1:5
-            s = shadedErrorBar([1:25],squeeze(pcmean(imodel,ivb,ivg,:)),squeeze(pcse(imodel,ivb,ivg,:)));
-            s.mainLine.Color = modelcolors(imodel,:);
-            s.mainLine.LineWidth = 3;
-            s.edge.delete;
-            s.patch.FaceColor = modelcolors(imodel,:);
-            s.patch.FaceAlpha = 0.6;
-            s.patch.EdgeColor = modelcolors(imodel,:);
-            s.patch.EdgeAlpha = 1;
-%             s.edge.Color
-        end
-        xlabel('Trial')
-        ylabel('p correct')
+for imeasure = 1:2
+    
+    if imeasure ==1
+        thisMeasure = corr_cond;
+    else
+        thisMeasure = (conf_cond-1)/10+.5;
     end
+
+    measureMean = squeeze(mean(thisMeasure,3));
+    measureSe = squeeze(std(thisMeasure,[],3)/sqrt(size(thisMeasure,3)));
+
+    figure()
+    i = 0;
+    for ivb = 1:2
+        for ivg = 1:2
+            i= i+1;
+            subplot(2,2,i)
+    %         shadedErrorBar([1:25],squeeze(corrmean(ivb,ivg,:)),squeeze(corrse(ivb,ivg,:)));
+            errorbar([1:25],squeeze(measureMean(ivb,ivg,:)),squeeze(measureSe(ivb,ivg,:)),':k');
+            ylim([.4,1])
+            for imodel = 1:5
+                s = shadedErrorBar([1:25],squeeze(pcmean(imodel,ivb,ivg,:)),squeeze(pcse(imodel,ivb,ivg,:)));
+                s.mainLine.Color = modelcolors(imodel,:);
+                s.mainLine.LineWidth = 3;
+                s.edge.delete;
+                s.patch.FaceColor = modelcolors(imodel,:);
+                s.patch.FaceAlpha = 0.6;
+                s.patch.EdgeColor = modelcolors(imodel,:);
+                s.patch.EdgeAlpha = 1;
+    %             s.edge.Color
+            end
+            xlabel('Trial')
+            ylabel('p correct')
+        end
+    end
+
+    legend({'data',modellabels{:}})
+
+
+    condcolors = [6  95  37; 
+            143 202 51;
+            155 136 21;
+            240 213 49]/255;
+     condcolors = condcolors(end:-1:1,:);
+
 end
-
-legend({'data',modellabels{:}})
-
-
-condcolors = [6  95  37; 
-        143 202 51;
-        155 136 21;
-        240 213 49]/255;
- condcolors = condcolors(end:-1:1,:);
-
 % corrcond_m = mean(mean(corr_cond,4),3);
 % corrcond_se = std(mean(corr_cond,4),[],3)./sqrt(size(corr_cond,3));
 

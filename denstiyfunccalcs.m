@@ -3,7 +3,7 @@ M = 35;
 V = 10;
 
 M2 = 65;
-V2 = 25;
+V2 = 10;
 
 x = [0:0.1:100]
 lambda = .1
@@ -14,8 +14,8 @@ u = -exp(-lambda.*x); %% utility function
 y = exp(-((x-M).^2/(2.*V)))./sqrt(2*pi*V); %% density function of x
 
 % expected utility
-EUlowvar = integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V)))),-Inf,Inf)/sqrt(2*pi*V)
-EUhighvar = integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V2)))),-Inf,Inf)/sqrt(2*pi*V2)
+EUlowvar = integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V)))),T,Inf)/sqrt(2*pi*V)
+EUhighvar = integral(@(x)(-exp(-lambda.*x).*exp(-((x-M2).^2./(2.*V2)))),T,Inf)/sqrt(2*pi*V2)
 
 EUlowvar>EUhighvar
 

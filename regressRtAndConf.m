@@ -1,7 +1,7 @@
 addpath('ModelingFuncs\');
 addpath('helperfuncs\');
 loadExp1;
-load('Results\model_fitsMLE_exp1OLD.mat');
+load('Results\model_fitsMLE_exp1.mat');
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
 

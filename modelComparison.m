@@ -17,5 +17,5 @@ load('Results\model_fitsMLE_exp1');
     %     post{ifile} = postBMC.r;
     %     postratio{ifile} = ((postBMC.r(2,:)-postBMC.r(1,:))./(postBMC.r(2,:)+postBMC.r(1,:)))';
     
-    [postBMC,outBMC]  = VBA_groupBMC(-bic(:,[3,5])'/2);
+    [postBMC,outBMC]  = VBA_groupBMC(-bic(:,:)'/2);
 

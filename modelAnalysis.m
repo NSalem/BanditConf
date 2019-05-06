@@ -1,13 +1,13 @@
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-load('Results\model_fitsMLE_exp1OLD.mat');
+load('Results\model_fitsMLE_exp1.mat');
 loadExp1;
 ChoicesOrig = Choices;
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
 
 %% get model accuracy and conf per condition
-for imodel  = 1:numel(parameters)
+for imodel  = 1:5;%numel(parameters)
     for isub = 1:size(Choices,2)
         paramstruct = modelsinfo{imodel};
             for iparam = 1:numel(modelsinfo{imodel}.paramnames)
@@ -68,7 +68,7 @@ for imodel = 1:size(myQ,1)
     s.patch.FaceAlpha = 0.6;
 end
 
-% %% plot probability of choosing door 2 
+%% plot difference between model learnt means and actual means 
 modellabels = {'1 \alpha_Q, 1 \alpha_V','2 \alpha_Q, 1 \alpha_V','1 \alpha_Q, 2 \alpha_V','2 \alpha_Q, 2 \alpha_V'};
 legend(modellabels)
 xlabel('Trial number')
@@ -107,7 +107,6 @@ for ivb = 1:numel(vars)
             ChoicesSubCond = Choices((sel),isub);
             ConfSubCond = AbsConf((sel),isub);
             c_cond(ivb,ivg,isub,1:25) =ChoicesSubCond;
-
             correct = (ChoicesSubCond == 2 & Pr(sel,isub)>Pl(sel,isub))|(ChoicesSubCond == 1 & Pr(sel,isub)<Pl(sel,isub));
             corr_cond(ivb,ivg,isub,1:25) = correct;
             conf_cond(ivb,ivg,isub,1:25) =ConfSubCond;
@@ -117,13 +116,25 @@ for ivb = 1:numel(vars)
                 pc2 = squeeze(pc_all(imodel, isub,sel));
                 pcorr = squeeze(pc2.*(Pr(sel,isub)>Pl(sel,isub))+(1.-pc2).*(Pr(sel,isub)<Pl(sel,isub)));
                 model_pc_cond(imodel,ivb,ivg,isub,:) = pcorr ;
+                Qdiff_cond(imodel,ivb,ivg,isub,:) = Qdiff_all(imodel,isub,sel);
+                Q1_cond(imodel,ivb,ivg,isub,:) = Q_all(imodel,isub,1,sel);
+                Q2_cond(imodel,ivb,ivg,isub,:) = Q_all(imodel,isub,2,sel);
                 
+                 confAllConds = squeeze(conf_cond(:,:,isub,:));
+                 pcAllConds = squeeze(model_pc_cond(imodel,:,:,isub,:));
+                 Q1AllConds = Q1_cond(imodel,:,:,isub,:);
+                 Q2AllConds = Q2_cond(imodel,:,:,isub,:);
+                 QGood =  max(Q2AllConds(:),Q1AllConds(:));
+                 QBad =  min(Q2AllConds(:),Q1AllConds(:));
+                 
                 if ivb == 2 && ivg ==2
-                    varnames= {'confidence', 'modelpcorr'}
-                    tbl = table(ConfSubCond/6,pcorr,'VariableNames', varnames);  
+                    varnames= {'confidence', 'modelpcorr','QGood','QBad'}
+                    tbl = table(confAllConds(:),pcAllConds(:),'VariableNames', varnames);  
                     regThisSub = fitlm(tbl,'confidence ~ 1+modelpcorr');
                     BIC(isub, imodel) =   regThisSub.ModelCriterion.BIC;
                     coeffs(isub,imodel,:) = regThisSub.Coefficients.Estimate;
+                    conft(isub,imodel,:) = regThisSub.Coefficients.tStat;
+
                     RMSE(isub,imodel,:) = regThisSub.RMSE;
                 end
             end
@@ -194,7 +205,7 @@ end
 
 
 %% plot avg accuracy per condition
- modelmarkers = {'x','d','s','o','^'}
+modelmarkers = {'x','d','s','o','^'}
 mcorrcon = squeeze(mean(corr_cond,4));
 mcorrcon = reshape(mcorrcon,4,65);
 
@@ -246,9 +257,9 @@ for imodel = 1:5
 end
 legend(y,modellabels, 'Location', 'southeastoutside')
 
-%% plot calibration
-figure()
-pirateplot(mconfcon/6-mcorrcon,repmat(condcolors,4,1),-.5,.5,12,'','Condition','Confidence-Accuracy')
-hold on
-plot([0,5],[0,0],':k')
-xticklabels({'vLvL','vLvH','vHvL','vHvH'})
+% %% plot calibration
+% figure()
+% pirateplot(mconfcon/6-mcorrcon,repmat(condcolors,4,1),-.5,.5,12,'','Condition','Confidence-Accuracy')
+% hold on
+% plot([0,5],[0,0],':k')
+% xticklabels({'vLvL','vLvH','vHvL','vHvH'})

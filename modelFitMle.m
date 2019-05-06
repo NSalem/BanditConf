@@ -12,7 +12,7 @@ loadModelsInfo;
 ntrials = size(Choices,1);
 
 options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
-for imodel = 5%1:numel(modelsinfo) 
+for imodel = 1:numel(modelsinfo) 
     lb = modelsinfo{imodel}.lb;
     ub = modelsinfo{imodel}.ub;
     x0 = modelsinfo{imodel}.x0;
@@ -25,4 +25,4 @@ for imodel = 5%1:numel(modelsinfo)
     end
 end
 
-save('Results\model_fitsMLE_exp1_model5','parameters','ll', 'modelsinfo')
+save('Results\model_fitsMLE_exp1','parameters','ll', 'modelsinfo')

@@ -58,9 +58,11 @@ classdef    qLearner < handle
             delta =  r - obj.Q(a);                                       
 
             %% update var
-            if obj.Q(a)~=0
-                deltaV = ((r - obj.Q(a))^2 -obj.V(a)); 
-                obj.V(a) = obj.V(a) + obj.lrv.*deltaV.*double(delta>0) + obj.lrv2.*deltaV.*double(delta<0);
+            if isprop(obj,'lrv') && ~isempty(obj.lrv) 
+                if obj.Q(a)~=0
+                    deltaV = ((r - obj.Q(a))^2 -obj.V(a)); 
+                    obj.V(a) = obj.V(a) + obj.lrv.*deltaV.*double(delta>0) + obj.lrv2.*deltaV.*double(delta<0);
+                end
             end
             %% udapte mean 
             
@@ -83,8 +85,10 @@ classdef    qLearner < handle
         function [action,p] = chooseAction(obj) 
             if isprop(obj,'T') && ~isempty(obj.T) 
                 [action,p] = chooseActionThresholdSigmoid(obj);
-            else 
+            elseif isprop(obj,'lrv') && ~isempty(obj.lrv) 
                 [action,p] = chooseActionThompson(obj);
+            elseif isprop(obj,'beta') && ~isempty(obj.beta)
+                [action,p] = chooseActionSigmoid(obj);
             end
         end
     
@@ -98,12 +102,11 @@ classdef    qLearner < handle
                 Q1 = randn(1000, 1,1)*sqrt(obj.V(1))+obj.Q(1); %sampled values from current prior distribution of option1
                 Q2 = randn(1000, 1,1)*sqrt(obj.V(2))+obj.Q(2); %sampled values from current prior distribution of option2
 
-            %     f = @(x) normpdf(x,priorMean1,sqrt(priorVar1)).*(4-normcdf(x,priorMean2,sqrt(priorVar2)));
-            %     conf2 = integral(f,-4,4);
-
                 pQ2 = sum(Q2>Q1)/numel(Q1); %probability of choosing action 1 is equal to the proportion of sampled  
                                             %values of Q1 that are higher than sampled values from Q2  
-               if pQ2 == 1
+                if (obj.V(1)== 0 || obj.V(2) ==0);
+                    pQ2 = .5;
+                elseif pQ2 == 1
                     pQ2 = 1-1/1000;
                 elseif pQ2 ==0
                     pQ2 = 1/1000;
@@ -126,7 +129,7 @@ classdef    qLearner < handle
            Q2 = obj.Q(2);
            Q1 = obj.Q(1);
            
-           dQ = Q2 - Q1; % correct vs incorrect
+           dQ = (Q2 - Q1)./100; % correct vs incorrect
            
            pc = 1./(1+exp(-dQ.*obj.beta));
            action = double(rand<pc) + 1;
@@ -151,8 +154,8 @@ classdef    qLearner < handle
 %             integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V)))),-Inf,Inf)/sqrt(2*pi*V)
 %            SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q2).^2./(2.*V2)))),obj.T, Inf);
 %            SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q1).^2./(2.*V1)))),obj.T, Inf);                 
-           SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x-Q2).^2./(2.*V2))))),obj.T, Inf);
-           SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x-Q1).^2./(2.*V1))))),obj.T, Inf);
+           SP2 = (1/sqrt(2*pi*V2./100)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x-Q2./100).^2./(2.*V2./100))))),obj.T./100, Inf);
+           SP1 = (1/sqrt(2*pi*V1./100)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x-Q1./100).^2./(2.*V1./100))))),obj.T./100, Inf);
            
 %            T1 = (obj.T-Q1)./V1;
 %            T2 = (obj.T-Q2)./V2;
@@ -162,7 +165,7 @@ classdef    qLearner < handle
 %             
 
            
-           dQ = (abs(SP2)-abs(SP1))./(abs(SP1)+abs(SP2));
+           dQ = (abs(SP2)-abs(SP1));
            if isnan(dQ)
                dQ = 0;
            end

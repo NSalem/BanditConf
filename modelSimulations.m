@@ -6,7 +6,7 @@ clear
 close all
 addpath('ModelingFuncs\');
 addpath('helperfuncs\')
-outfilename = 'model_simulations_results.mat';
+outfilename = 'model_simulations_results_exp1.mat';
 loadExp1; %load experiment 1 to use the same probability distributions for outcomes
 
 n_sims      = 50;
@@ -16,7 +16,7 @@ estimateLPP = 1;
 estimateML = 0;
 
 % models = 1:6;
-% n_models = 6;
+n_models = 5;
 
 
 %% establish distribution of generative parameters
@@ -38,7 +38,7 @@ estimateML = 0;
 clear parameters;
 
 %% initialize arrays, etc
-n_models = numel(modelsinfo);
+% n_models = numel(modelsinfo);
 parametersLPP = {};
 parametersLPP = {};
 LPP = nan(n_sims, n_sub, n_models,n_models); %LPP matrix of generative models by recovered models for each subj and sim
@@ -152,7 +152,11 @@ for isim = 1:n_sims
             end
         end
     end
-    save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP', 'parametersLPP', 'genparams', 'ntrials', 'n_sims', 'modelsinfo','-append')
+    if ~exist(['Results',filesep,outfilename])
+        save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP', 'parametersLPP', 'genparams', 'ntrials', 'n_sims', 'modelsinfo')
+    else
+        save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP', 'parametersLPP', 'genparams', 'ntrials', 'n_sims', 'modelsinfo','-append')
+    end
 end
 
 % con_mat2 = (con_mat-max(con_mat(:)))/((max(con_mat(:))-min(con_mat(:))))*(1-0.5)+1;%green = '\color[rgb]{0,1,0}'

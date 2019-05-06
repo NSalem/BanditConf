@@ -13,6 +13,7 @@ u = -exp(-lambda.*x); %% utility function
 
 y = exp(-((x-M).^2/(2.*V)))./sqrt(2*pi*V); %% density function of x
 
+T = 50;
 % expected utility
 EUlowvar = integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V)))),T,Inf)/sqrt(2*pi*V)
 EUhighvar = integral(@(x)(-exp(-lambda.*x).*exp(-((x-M2).^2./(2.*V2)))),T,Inf)/sqrt(2*pi*V2)

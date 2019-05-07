@@ -15,9 +15,9 @@ ntrials = size(Choices,1);
 estimateLPP = 1;
 estimateML = 0;
 
-% models = 1:6;
-n_models = 5;
 
+ loadModelsInfo;
+ n_models = numel(modelsinfo);
 
 %% establish distribution of generative parameters
 
@@ -29,7 +29,6 @@ n_models = 5;
  gen.beta  = @()random('Gamma',1.2,5);
  gen.T = @()random('Beta',1.1,1.1)*100;
 
- loadModelsInfo;
 
 % load parameters from model fits
 % load ('model_fits.mat','parameters','modelsinfo')

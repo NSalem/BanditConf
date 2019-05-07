@@ -7,7 +7,7 @@ Choices = Choices + 2;
 Choices(Choices==3) = 2;
 
 %% get model accuracy and conf per condition
-for imodel  = 1:5;%numel(parameters)
+for imodel  = numel(parameters)
     for isub = 1:size(Choices,2)
         paramstruct = modelsinfo{imodel};
             for iparam = 1:numel(modelsinfo{imodel}.paramnames)
@@ -35,7 +35,7 @@ mpc2 = squeeze(mean(pc_all,2)); %probability of choosing door 2
 sepc2 = squeeze(std(pc_all,[],2))./sqrt(size(Choices,2)); %probability of choosing door 2
 
 
-Pdiff = repmat((Pr'-Pl'),1,1,5);
+Pdiff = repmat((Pr'-Pl'),1,1,numel(parameters));
 Pdiff = permute(Pdiff,[3,1,2]);
 QdiffM = Qdiff_all-Pdiff;
 
@@ -112,7 +112,7 @@ for ivb = 1:numel(vars)
             conf_cond(ivb,ivg,isub,1:25) =ConfSubCond;
 
 
-            for imodel = 1:5
+            for imodel = 1:6
                 pc2 = squeeze(pc_all(imodel, isub,sel));
                 pcorr = squeeze(pc2.*(Pr(sel,isub)>Pl(sel,isub))+(1.-pc2).*(Pr(sel,isub)<Pl(sel,isub)));
                 model_pc_cond(imodel,ivb,ivg,isub,:) = pcorr ;
@@ -129,7 +129,7 @@ for ivb = 1:numel(vars)
                  
                 if ivb == 2 && ivg ==2
                     varnames= {'confidence', 'modelpcorr','QGood','QBad'}
-                    tbl = table(confAllConds(:),pcAllConds(:),'VariableNames', varnames);  
+                    tbl = table(confAllConds(:),pcAllConds(:),QGood,QBad,'VariableNames', varnames);  
                     regThisSub = fitlm(tbl,'confidence ~ 1+modelpcorr');
                     BIC(isub, imodel) =   regThisSub.ModelCriterion.BIC;
                     coeffs(isub,imodel,:) = regThisSub.Coefficients.Estimate;

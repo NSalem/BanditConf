@@ -65,12 +65,7 @@ classdef    qLearner < handle
                 end
             end
             %% udapte mean 
-            
-            if obj.confirmatory 
-                obj.Q(a) = obj.Q(a) + obj.lrm.*delta.*double(delta>0) + obj.lrm2.*delta.*double(delta<0);                                     % the delta rule for the factual choice             
-            else
-                obj.Q(a) = obj.Q(a) + obj.lrm.*delta;                                     % the delta rule for the factual choice
-            end
+            obj.Q(a) = obj.Q(a) + obj.lrm.*delta.*double(delta>0) + obj.lrm2.*delta.*double(delta<0);                                     % the delta rule for the factual choice             
 
             %% drift Q unchosen towards T 
             if isprop(obj,'T') && ~isempty(obj.T) && obj.drift
@@ -152,18 +147,10 @@ classdef    qLearner < handle
            V1 = obj.V(1);
            
 %             integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V)))),-Inf,Inf)/sqrt(2*pi*V)
-%            SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q2).^2./(2.*V2)))),obj.T, Inf);
-%            SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(-exp(-obj.lambda.*x).*exp(-((x-Q1).^2./(2.*V1)))),obj.T, Inf);                 
-           SP2 = (1/sqrt(2*pi*V2./100)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x-Q2./100).^2./(2.*V2./100))))),obj.T./100, Inf);
-           SP1 = (1/sqrt(2*pi*V1./100)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x-Q1./100).^2./(2.*V1./100))))),obj.T./100, Inf);
-           
-%            T1 = (obj.T-Q1)./V1;
-%            T2 = (obj.T-Q2)./V2;
-%            
-%            SP2 = (1/sqrt(2*pi)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x).^2./(2))))),T2, Inf);
-%            SP1 = (1/sqrt(2*pi)).*integral(@(x)(-exp(-obj.lambda.*x+(-((x).^2./(2))))),T1, Inf);
-%             
-
+%            SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(exp((-((x-Q2).^2./(2.*V2))))),obj.T, Inf);
+%            SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(exp((-((x-Q1).^2./(2.*V1))))),obj.T, Inf);
+           SP2 = 1-normcdf(obj.T,Q2,sqrt(V2));
+           SP1 = 1-normcdf(obj.T,Q1,sqrt(V1));
            
            dQ = (abs(SP2)-abs(SP1));
            if isnan(dQ)

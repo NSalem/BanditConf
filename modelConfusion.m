@@ -1,14 +1,14 @@
 
 load('Results\model_simulations_results_exp1.mat')
 
-whichmodels = [1:5]
+whichmodels = [1:6]
 options = struct();
 confusion = zeros(numel(whichmodels),numel(whichmodels));
 
 criterion = bic;
 options.DisplayWin = 0;
 
-for isim = 1:size(bic,1)
+for isim = 1:1%size(bic,1)
     for igenmodel = 1:numel(whichmodels)
         genmodel = whichmodels(igenmodel);
         [post, out] = VBA_groupBMC(squeeze(-criterion(isim,:,genmodel,whichmodels))'/2,options);

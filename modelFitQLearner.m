@@ -10,7 +10,7 @@ loadModelsInfo;
 
 ntrials = size(Choices,1);
 
-whichmodels = 1:5;%1:numel(modelsinfo);
+whichmodels = 1:numel(modelsinfo);
 options = optimset('Algorithm', 'interior-point', 'Display', 'final', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
 for imodel = whichmodels;
     lb = modelsinfo{imodel}.lb;
@@ -20,9 +20,10 @@ for imodel = whichmodels;
         [parameters{imodel}(isub,:),LPP(isub,imodel),report(isub,imodel),gradient{isub,imodel},hessian{isub,imodel}]=fmincon(@(x) GetModelLL_QLearner(x,modelsinfo{imodel},Choices(:,isub),Reward(:,isub),1),x0,[],[],[],[],lb,ub,[],options);
         nfpm = numel(modelsinfo{imodel}.paramnames);
         this_ll =  GetModelLL_QLearner(parameters{imodel}(isub,:),modelsinfo{imodel},Choices(:,isub),Reward(:,isub),0);
+        ll(isub,imodel) = this_ll;
         bic(isub,imodel)=-2*-this_ll+nfpm*log(ntrials);
         aic(isub, imodel)=-2*-this_ll+nfpm; 
     end
 end
 
-save('Results\model_fitsMAP_exp1','parameters','LPP', 'modelsinfo')
+save('Results\model_fitsMAP_exp1','parameters','LPP', 'modelsinfo','bic', 'aic')

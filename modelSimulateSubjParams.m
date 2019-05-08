@@ -13,7 +13,13 @@ for imodel  = 1:numel(parameters)
             for iparam = 1:numel(modelsinfo{imodel}.paramnames)
                 paramstruct.(modelsinfo{imodel}.paramnames{iparam}) = parameters{imodel}(isub,iparam);
             end
-       [Q,V,pc,PE] = Computational_TimeSeries_QLearner(paramstruct,Choices(:,isub),Reward(:,isub));    
+            OUT(1,:) = round(randn(size(Pl,1),1).*Vl(:,isub)+Pl(:,isub));
+            OUT(2,:) = round(randn(size(Pl,1),1).*Vr(:,isub)+Pr(:,isub));
+            OUT(OUT<5) = 5;
+            OUT(OUT>95) = 95;
+            
+       [~,~,~,a,r] =  Computational_Simus_QLearner(paramstruct,OUT);
+       [Q,V,pc,PE] = Computational_TimeSeries_QLearner(paramstruct,a,r);    
         pc_all(imodel,isub,:) = pc;
         Q_all(imodel,isub,:,:)= Q;
         V_all(imodel,isub,:,:)= V;
@@ -70,7 +76,9 @@ for imodel = 1:size(myQ,1)
 end
 
 %% plot difference between model learnt means and actual means 
-modellabels = {'1 \alpha_Q, 1 \alpha_V','2 \alpha_Q, 1 \alpha_V','1 \alpha_Q, 2 \alpha_V','2 \alpha_Q, 2 \alpha_V'};
+% modellabels = {'1 \alpha_Q, 1 \alpha_V','2 \alpha_Q, 1 \alpha_V','1 \alpha_Q, 2 \alpha_V','2 \alpha_Q, 2 \alpha_V'};
+modellabels = {'Q1','Q2','Q1V1', 'Q2V1', 'Q1V2', 'SSAT'};
+
 legend(modellabels)
 xlabel('Trial number')
 ylabel('(Q_2-Q_1) - (\mu_2-\mu_1)')
@@ -211,7 +219,7 @@ mcorrcon = squeeze(mean(corr_cond,4));
 mcorrcon = reshape(mcorrcon,4,65);
 
 mmodelpccon = mean(model_pc_cond,5);
-mmodelpccon = reshape(mmodelpccon,5,4,65);
+mmodelpccon = reshape(mmodelpccon,numel(parameters),4,65);
 modelmean = squeeze(mean(mmodelpccon,3));
 modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % std(pcmean,[]/4)/sqrt(size;
@@ -219,14 +227,19 @@ modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 figure()
 % errorbar(corrcond_m(:),corrcond_se(:))
 
-pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1.1,12,'','Condition','p correct')
+% pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1.1,12,'','Condition','p correct')
 hold on
 plot([0,5],[.5,.5],':k')
-xticklabels({'vLvL','vLvH','vHvL','vHvH'})
-for imodel = 1:5
-    for ibar = 1:4
-        y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar),modelse(imodel,ibar),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
-    end
+% xticklabels({'vLvL','vLvH','vHvL','vHvH'})
+for imodel = 1:6
+
+%     y(imodel) = errorbar((2:5-imodel)*0.1,modelmean(imodel,:),modelse(imodel,:),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
+        y(imodel) = errorbar(1:4,modelmean(imodel,:),modelse(imodel,:),['k-',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
+        y(imodel).Color = modelcolors(imodel,:);
+        
+%       for ibar = 1:4
+ %         y(imodel) = errorbar((1:4-imodel)*0.1,modelmean(imodel,:),modelse(imodel,:),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
+%     end
 end
 legend(y,modellabels, 'Location', 'southeastoutside')
 % hold on
@@ -238,7 +251,7 @@ mconfcon = squeeze(mean(conf_cond,4));
 mconfcon = reshape(mconfcon,4,65);
 
 mmodelpccon = mean(model_pc_cond,5);
-mmodelpccon = reshape(mmodelpccon,5,4,65);
+mmodelpccon = reshape(mmodelpccon,numel(parameters),4,65);
 modelmean = squeeze(mean(mmodelpccon,3));
 modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % std(pcmean,[]/4)/sqrt(size;

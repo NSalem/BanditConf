@@ -1,4 +1,4 @@
-function [Q,V,pc,a,r,c] = SimulateQLearner(params,OUT)
+function [Q,V,pc,a,r] = SimulateQLearner(params,OUT)
 
 l = qLearner(params);
 %% Hidden variables

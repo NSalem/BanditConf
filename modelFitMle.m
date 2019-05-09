@@ -11,7 +11,7 @@ loadModelsInfo;
 
 ntrials = size(Choices,1);
 
-options = optimset('Algorithm', 'interior-point', 'Display', 'iter-detailed', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
+options = optimset('Algorithm', 'interior-point', 'Display', 'final', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
 for imodel = 1:numel(modelsinfo) 
     lb = modelsinfo{imodel}.lb;
     ub = modelsinfo{imodel}.ub;

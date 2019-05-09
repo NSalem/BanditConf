@@ -1,6 +1,6 @@
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-load('Results\model_fitsMAP_exp1.mat');
+load('Results\model_fitsMLE_exp1.mat');
 loadExp1;
 ChoicesOrig = Choices;
 Choices = Choices + 2;
@@ -113,7 +113,7 @@ for ivb = 1:numel(vars)
             conf_cond(ivb,ivg,isub,1:25) =ConfSubCond;
 
 
-            for imodel = 1:6
+            for imodel = 1:numel(parameters)
                 pc2 = squeeze(pc_all(imodel, isub,sel));
                 pcorr = squeeze(pc2.*(Pr(sel,isub)>Pl(sel,isub))+(1.-pc2).*(Pr(sel,isub)<Pl(sel,isub)));
                 model_pc_cond(imodel,ivb,ivg,isub,:) = pcorr ;

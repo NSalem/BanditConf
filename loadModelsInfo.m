@@ -55,13 +55,12 @@ modelsinfo{8}.drift = true;
 % modelsinfo{9}.drift = true;
 
 priorfuncs.beta = '@(x) log(gampdf(x,1.2,5))';
-% priorfuncs.beta = '@(x) log(gampdf(x,1.29,2.03))';
 priorfuncs.lrm = '@(x) log(betapdf(x,1.1,1.1))';
 priorfuncs.lrm2 = priorfuncs.lrm; 
 priorfuncs.lrv = priorfuncs.lrm; 
 priorfuncs.lrv2 = priorfuncs.lrm; 
 priorfuncs.T = '@(x) log(betapdf(x/100,1.1,1.1))';
-priorfuncs.lambda = '@(x) log(gampdf(x,.08,41.46))';
+% priorfuncs.lambda = '@(x) log(gampdf(x,.08,41.46))';
     
 for imodel = 1:numel(modelsinfo)
     for iparam = 1:numel(modelsinfo{imodel}.paramnames)

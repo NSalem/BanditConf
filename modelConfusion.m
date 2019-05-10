@@ -1,7 +1,7 @@
 
 load('Results\model_simulations_results_exp1.mat')
 
-whichmodels = [1:6]
+whichmodels = [1:8]
 options = struct();
 confusion = zeros(numel(whichmodels),numel(whichmodels));
 

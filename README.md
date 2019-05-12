@@ -84,14 +84,15 @@ Results of 20 simulations using subject parameters compared against actual human
 
 #### average accuracy per condition
 <img src="./Plots/resim_accuracy_cond_models1to8.png">
-The violin plots represent the distribution of accuracy across participants in the real data. column represents a condition color coded as in the first figure in the "dataset" section (from left to right: low variance for both options, low variance for good option, low variance for bad option, low variance for both options) The overlayed color-filled shapes represent the predictions of the different models.
+The violin plots represent the distribution of accuracy across participants in the real data. column represents a condition color coded as in the first figure in the "dataset" section (from left to right: low variance for both options, low variance for good option, low variance for bad option, high variance for both options) The overlayed color-filled shapes represent the predictions of the different models.
 
 #### average confidence per condition
 Confidence is rated in a Likert scale from 1 to 6, but here is transformed to be between .5 and 1
 <img src="./Plots/resim_confidence_cond_models1to8.png">
-Comparing Q1 and Q1V1 one can see that Q1V1 replicates better the pattern in the data, that is, confidence depends mostly on the variance of the good option, but much less on the variance of the bad option.
+Whereas confidence is underestimated in general, QV models make better predictions in somo conditions (low variance for good option).
 
 ### time course of accuracy per condition
+Top left: low variance for both options; bottom left: low variance for good option; top right: low variance for bad option; bottom right: high variance for both options. 
 The dotted lines represent the human data. The colored lines represent the different models as before.
 <img src="./Plots/resim_timecourse_accuracy_models1to8.png">
 

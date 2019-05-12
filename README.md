@@ -1,5 +1,9 @@
 # BanditConf
 Modeling choice and confidence in reinforcement learning (restless bandits) with Gaussian-distributed payoffs.
+
+### Matlab version and dependencies
+This code was tested in Matlab versions 2017b and 2018b. Parts of it require Matlab's statistics toolbox and optimization toolbox. Bayesian model comparison requires VBA toolbox.
+
 ## Dataset 
  The data are those used by [Hertz et al (2018)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0195399).
 
@@ -22,28 +26,43 @@ Since they observed participants seem to take into account only the SD of the go
 
 
 ## Modeling
+I test different biases to analyse their ability to replicate human behavior (choice and confidence reports). At the learning stage, I test variations of an optimisticbias (i.e., updating the subjective values more for positive than for negative prediction errors), and at the action/confidence selection stage, I test a satisficing criterion (softmax function over the difference in probability of a “good enough” outcome for each option) versus random exploration (softmax function over learnt means), and [Thompson sampling (Thompson, 1933)](https://www.dropbox.com/s/yhn9prnr5bz0156/1933-thompson.pdf)(i.e. the probability of choosing option A matches the probability that A it gives a higher reward than B).
 
-Here I test several Q-learning models to explain choice and confidence. As in some of Hertz's models, I assume learning about the mean and variance:
+I test 8 different models, varying whether they learn about the outcome variance, the type of learning bias (none, mean, and variance; more details below) and the action selection:
+
+### Q1
+The model updates the subjective value ("expected outcome") of the chosen option based on the prediction error (difference between obtained and expected outcome) and a learning rate parameter (alpha). 
 
 <img src="./Figures/model1_Q.PNG">
 
 Where Q is the trial-by-treal belief about the mean of each option
 
+Action selection is then done according to a softmax choice:
+<img src= "./Figures/softmax.PNG">
+Where beta can be considered an "exploration rate" parameter. The probability of choosing option A will be higher the higher the difference in the Q values, and beta scales this increase.
 
+### Q2 
+This model works as Q1, only it uses a different learning rate depending on the sign of the prediction error term (<img src="https://latex.codecogs.com/gif.latex?R%28t%29%20-%20Q_a%28t%29">), similar to [Lefebvre et al.(2017)](https://www.nature.com/articles/s41562-017-0067). 
+
+### Q1V1
+This model learns about the mean outcome of the options like Q1, but it also learns about their variances:
 <img src="./Figures/model1_V.PNG">
+To make use of the learnt variance for choice, this model uses [Thompson sampling (Thompson, 1933)](https://www.dropbox.com/s/yhn9prnr5bz0156/1933-thompson.pdf), which would be equivalent to sampling a random number from each value distribution and compare them, choosing whichever is highest. 
 
-Where V is the trial-by-treal belief about the variance of each option
+### Q2V1
+Same as Q1V1, but with two learning rates for the means (as Q2)
 
-In principle I assume choice and confidence based on [Thompson sampling (Thompson, 1933)](https://www.dropbox.com/s/yhn9prnr5bz0156/1933-thompson.pdf), i.e. the probability of choosing option A matches the probability that A it gives a higher reward than B. 
+### Q1V2 
+Same as Q1V1, but with two learning rates for the _variances_ of the outcomes.
 
-I compare an unbiased learning model with models that learn differently for positive and negative surprises (prediction errors), in the spirit of previous computational models of optimistic learning ([Lefebvre et al 2017](https://www.nature.com/articles/s41562-017-0067)). 
+### Q1V1-T, Q2V1-T, Q1V2-T
+These are versions of Q1V1, Q2V1, and Q1V2 with a "satisficing" choice rule, calculating the probability that the oputcome of each option is bigger than a threshold (T), (cummulative density function of T given the learnt distribution mean and sd). Then these probabilities are input into a softmax function. Additionally, there is some decay in the learnt value of the unchosen option, such that it drifts towards the treshold: 
+<img src="./Figures/driftQ.PNG">
 
-In particular, I test a model that learn differently for positive or negative reward prediction errors ( <img src="https://latex.codecogs.com/gif.latex?R%28t%29%20-%20Q_a%28t%29"> )
-, having either: 
-- different learning rates about the mean (alpha) 
-- different learning rates about the variance (gamma)
-- different learning rates about both the mean and the variance 
+Notice the drift happens according to the learning rate of the mean. For Q2V1,there are two learning rates (for positive and negative prediction errors). I (somewhat arbitrarily) used the one for positive prediction errors.
 
+
+## Instructions 
 
 
 <!---

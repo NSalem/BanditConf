@@ -101,8 +101,6 @@ The dotted lines represent the human data. The colored lines represent the diffe
 <img src="./Plots/resim_timecourse_conf_models1to8.png">
 
 
-
-
 <!---
 [comment]: #(![f1] use something like this to insert formulas)
 [f1]: http://chart.apis.google.com/chart?cht=tx&chl=\alpha

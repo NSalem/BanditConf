@@ -27,13 +27,12 @@ Since they observed participants seem to take into account only the SD of the go
 ## Instructions 
 Main analysis scripts: 
 - modelFitMap : fits parameters for each model to each participant and saves results 
-- modelComparison: does Bayesian model comparison to test which model accounts best for the data
-- modelComparisonConfidence: does Bayesian model comparison to predict confidence instead of choice
+- modelComparison: does Bayesian model comparison to test which model accounts best for the data. It estimates the best model for each participant, and compares the model frequncies.
+- modelComparisonConfidence: fits confidence on the probability of correct choice expected by each model for each participant, and calculates the model likelihood. then does Bayesian model comparison based on this. 
 - modelAnalysis: shows plots comparing actual accuracy against model predicted accuracy based on the trial by trial probabilty of choosing the right option (but using the actual subject actions for learning). 
 - modelSimulateSubjParameters: similar to the previous one, but the model predictions are calculated by simulating model choice and learning from the subjects parameters
 - modelSimulations: simulate behavior with random parameters for each model, and do model fitting, resulting in crossed goodness-of-fit measures between models.
 - modelConfusion: does bayesian model comparison on the simulations, producing a confusion matrix for the models (showing the frequency with which each model is deemed best for each generative model).  
-
 
 ## Models
 I test different biases to analyse their ability to replicate human behavior (choice and confidence reports). At the learning stage, I test variations of an optimisticbias (i.e., updating the subjective values more for positive than for negative prediction errors), and at the action/confidence selection stage, I test a satisficing criterion (softmax function over the difference in probability of a “good enough” outcome for each option) versus random exploration (softmax function over learnt means), and [Thompson sampling (Thompson, 1933)](https://www.dropbox.com/s/yhn9prnr5bz0156/1933-thompson.pdf)(i.e. the probability of choosing option A matches the probability that A it gives a higher reward than B).
@@ -70,6 +69,22 @@ These are versions of Q1V1, Q2V1, and Q1V2 with a "satisficing" choice rule, cal
 <img src="./Figures/driftQ.PNG">
 
 Notice the drift happens according to the learning rate of the mean. For Q2V1,there are two learning rates (for positive and negative prediction errors). I (somewhat arbitrarily) used the one for positive prediction errors.
+
+
+## Summary of results
+
+### Best model for choice 
+
+<img src="./Plots/model_comparison_choice.png">
+
+### Best model for confidence
+
+<img src="./Plots/model_comparison_conf.png">
+
+### Model identifiability
+<img src="./Plots/model_confusion.png">
+
+### Model predictions
 
 
 <!---

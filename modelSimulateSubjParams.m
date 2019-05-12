@@ -6,6 +6,12 @@ ChoicesOrig = Choices;
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
 
+whichmodels = 1:numel(parameters);
+nmodels = numel(whichmodels);
+
+allabels= {'Q1','Q2','Q1V1','Q2V1','Q1V2','Q1V1-T','Q2V1-T','Q1V2-T'}
+modellabels = {allabels{whichmodels}};
+
 %% get model accuracy and conf per condition
 for imodel  = 1:numel(parameters)
     for isub = 1:size(Choices,2)
@@ -41,65 +47,25 @@ mpc2 = squeeze(mean(pc_all,2)); %probability of choosing door 2
 sepc2 = squeeze(std(pc_all,[],2))./sqrt(size(Choices,2)); %probability of choosing door 2
 
 
-Pdiff = repmat((Pr'-Pl'),1,1,numel(parameters));
-Pdiff = permute(Pdiff,[3,1,2]);
-QdiffM = Qdiff_all-Pdiff;
+% Pdiff = repmat((Pr'-Pl'),1,1,numel(parameters));
+% Pdiff = permute(Pdiff,[3,1,2]);
+% QdiffM = Qdiff_all-Pdiff;
 
-
-%% plot average difference between Q-value difference and mean difference accross time
-
-
-% modelcolors = [.5,.5,.5;
-% 1,0,0;
-% 0,0,1;
-% 1,0,1;
-% 0,1,0];
 
 modelcolors = [
-228,26,28;
-55,126,184;
-77,175,74;
-152,78,163;
-255,127,0;
-255,255,51;
+141,211,199;
+255,255,179;
+190,186,218;
+251,128,114;
+128,177,211;
+253,180,98;
+179,222,105;
+252,205,229;
+217,217,217;
+188,128,189;
 ]/255;
 
-figure()
-% plot(mean(Pr'-Pl'),'k')
-hold on
-for imodel = 1:size(myQ,1)
-    s = shadedErrorBar([1:240],squeeze(mean(QdiffM(imodel,:,:),2)),squeeze(std(QdiffM(imodel,:,:),[],2)./sqrt(size(Choices,2))))
-    s.mainLine.Color = modelcolors(imodel,:);
-    s.edge.delete;
-    s.patch.FaceColor = modelcolors(imodel,:);
-    s.patch.FaceAlpha = 0.6;
-end
-
-%% plot difference between model learnt means and actual means 
-% modellabels = {'1 \alpha_Q, 1 \alpha_V','2 \alpha_Q, 1 \alpha_V','1 \alpha_Q, 2 \alpha_V','2 \alpha_Q, 2 \alpha_V'};
-modellabels = {'Q1','Q2','Q1V1', 'Q2V1', 'Q1V2', 'SSAT'};
-
-legend(modellabels)
-xlabel('Trial number')
-ylabel('(Q_2-Q_1) - (\mu_2-\mu_1)')
-% figure()
-% plot(c2,'k')
-% hold on
-% 
-% for imodel = 1:size(mpc2,1)
-%     s = shadedErrorBar([1:240],mpc2(imodel,:),sepc2(imodel,:))
-%     s.mainLine.Color = modelcolors(imodel,:);
-%     s.edge.delete;
-%     s.patch.FaceColor = modelcolors(imodel,:);
-%     s.patch.FaceAlpha = 0.6;
-% end
-% 
-% % plot(mpc2')
-% legend({'data','1 \alpha_Q, 1 \alpha_V','2 \alpha_Q, 1 \alpha_V','1 \alpha_Q, 2 \alpha_V','2 \alpha_Q, 2 \alpha_V'})
-
-
-
-%% analyze only 4 conditions described in paper
+%% analyze 4 conditions described in paper
 
 vars = [10,25];
 
@@ -121,7 +87,7 @@ for ivb = 1:numel(vars)
             conf_cond(ivb,ivg,isub,1:25) =ConfSubCond;
 
 
-            for imodel = 1:6
+            for imodel = whichmodels
                 pc2 = squeeze(pc_all(imodel, isub,sel));
                 pcorr = squeeze(pc2.*(Pr(sel,isub)>Pl(sel,isub))+(1.-pc2).*(Pr(sel,isub)<Pl(sel,isub)));
                 model_pc_cond(imodel,ivb,ivg,isub,:) = pcorr ;
@@ -136,23 +102,23 @@ for ivb = 1:numel(vars)
                  QGood =  max(Q2AllConds(:),Q1AllConds(:));
                  QBad =  min(Q2AllConds(:),Q1AllConds(:));
                  
-                if ivb == 2 && ivg ==2
-                    varnames= {'confidence', 'modelpcorr','QGood','QBad'}
-                    tbl = table(confAllConds(:),pcAllConds(:),QGood,QBad,'VariableNames', varnames);  
-                    regThisSub = fitlm(tbl,'confidence ~ 1+modelpcorr');
-                    BIC(isub, imodel) =   regThisSub.ModelCriterion.BIC;
-                    coeffs(isub,imodel,:) = regThisSub.Coefficients.Estimate;
-                    conft(isub,imodel,:) = regThisSub.Coefficients.tStat;
-
-                    RMSE(isub,imodel,:) = regThisSub.RMSE;
-                end
+%                 if ivb == 2 && ivg ==2
+%                     varnames= {'confidence', 'modelpcorr','QGood','QBad'}
+%                     tbl = table(confAllConds(:),pcAllConds(:),QGood,QBad,'VariableNames', varnames);  
+%                     regThisSub = fitlm(tbl,'confidence ~ 1+modelpcorr');
+%                     BIC(isub, imodel) =   regThisSub.ModelCriterion.BIC;
+%                     coeffs(isub,imodel,:) = regThisSub.Coefficients.Estimate;
+%                     conft(isub,imodel,:) = regThisSub.Coefficients.tStat;
+% 
+%                     RMSE(isub,imodel,:) = regThisSub.RMSE;
+%                 end
             end
         end
     end
 end
 
-[selr,c] = find(~isinf(BIC));%
-BIC = BIC(selr,:); 
+% [selr,c] = find(~isinf(BIC));%
+% BIC = BIC(selr,:); 
 measureMean = squeeze(mean(corr_cond,3));
 measureSe = squeeze(std(corr_cond,[],3)/sqrt(size(conf_cond,3)));
 confmean = squeeze(mean(corr_cond,3));
@@ -183,15 +149,15 @@ for imeasure = 1:2
     %         shadedErrorBar([1:25],squeeze(corrmean(ivb,ivg,:)),squeeze(corrse(ivb,ivg,:)));
             errorbar([1:25],squeeze(measureMean(ivb,ivg,:)),squeeze(measureSe(ivb,ivg,:)),':k');
             ylim([.4,1])
-            for imodel = 1:5
+            for imodel = whichmodels
                 s = shadedErrorBar([1:25],squeeze(pcmean(imodel,ivb,ivg,:)),squeeze(pcse(imodel,ivb,ivg,:)));
                 s.mainLine.Color = modelcolors(imodel,:);
                 s.mainLine.LineWidth = 3;
                 s.edge.delete;
                 s.patch.FaceColor = modelcolors(imodel,:);
-                s.patch.FaceAlpha = 0.6;
+                s.patch.FaceAlpha = 0.2;
                 s.patch.EdgeColor = modelcolors(imodel,:);
-                s.patch.EdgeAlpha = 1;
+                s.patch.EdgeAlpha = 0.2;
     %             s.edge.Color
             end
             xlabel('Trial')
@@ -214,12 +180,12 @@ end
 
 
 %% plot avg accuracy per condition
-modelmarkers = {'x','d','s','o','^','v'}
+modelmarkers = {'^','^','d','d','d','o','o','o'}
 mcorrcon = squeeze(mean(corr_cond,4));
 mcorrcon = reshape(mcorrcon,4,65);
 
 mmodelpccon = mean(model_pc_cond,5);
-mmodelpccon = reshape(mmodelpccon,numel(parameters),4,65);
+mmodelpccon = reshape(mmodelpccon,nmodels,4,65);
 modelmean = squeeze(mean(mmodelpccon,3));
 modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % std(pcmean,[]/4)/sqrt(size;
@@ -227,19 +193,17 @@ modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 figure()
 % errorbar(corrcond_m(:),corrcond_se(:))
 
-% pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1.1,12,'','Condition','p correct')
+pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1.1,12,'','Condition','p correct')
 hold on
 plot([0,5],[.5,.5],':k')
 % xticklabels({'vLvL','vLvH','vHvL','vHvH'})
-for imodel = 1:6
-
+for imodel = whichmodels
 %     y(imodel) = errorbar((2:5-imodel)*0.1,modelmean(imodel,:),modelse(imodel,:),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
-        y(imodel) = errorbar(1:4,modelmean(imodel,:),modelse(imodel,:),['k-',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
-        y(imodel).Color = modelcolors(imodel,:);
-        
-%       for ibar = 1:4
- %         y(imodel) = errorbar((1:4-imodel)*0.1,modelmean(imodel,:),modelse(imodel,:),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
-%     end
+%         y(imodel) = errorbar(1:4,modelmean(imodel,:),modelse(imodel,:),['k-',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
+%         y(imodel).Color = modelcolors(imodel,:);    
+    for ibar = 1:4
+        y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar),modelse(imodel,ibar),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
+    end
 end
 legend(y,modellabels, 'Location', 'southeastoutside')
 % hold on
@@ -251,7 +215,7 @@ mconfcon = squeeze(mean(conf_cond,4));
 mconfcon = reshape(mconfcon,4,65);
 
 mmodelpccon = mean(model_pc_cond,5);
-mmodelpccon = reshape(mmodelpccon,numel(parameters),4,65);
+mmodelpccon = reshape(mmodelpccon,nmodels,4,65);
 modelmean = squeeze(mean(mmodelpccon,3));
 modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % std(pcmean,[]/4)/sqrt(size;
@@ -264,7 +228,7 @@ pirateplot(mconfcon,repmat(condcolors,4,1),1,6,12,'','Condition','Confidence')
 xticklabels({'vLvL','vLvH','vHvL','vHvH'})
 hold on
 % plot([0,5],[.5,.5],':k')
-for imodel = 1:5
+for imodel = whichmodels
     for ibar = 1:4
         y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar)*6,modelse(imodel,ibar)*6,['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
     end

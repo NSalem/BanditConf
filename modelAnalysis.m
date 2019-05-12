@@ -147,9 +147,9 @@ for imeasure = 1:2
                 s.mainLine.LineWidth = 3;
                 s.edge.delete;
                 s.patch.FaceColor = modelcolors(imodel,:);
-                s.patch.FaceAlpha = 0.6;
+                s.patch.FaceAlpha = 0.2;
                 s.patch.EdgeColor = modelcolors(imodel,:);
-                s.patch.EdgeAlpha = 1;
+                s.patch.EdgeAlpha = 0.2;
     %             s.edge.Color
             end
             xlabel('Trial')

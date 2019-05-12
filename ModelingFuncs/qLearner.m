@@ -13,8 +13,6 @@ classdef    qLearner < handle
         Q = [0,0];
         V = [0,0];
         r = [];
-        c = [];
-        confirmatory
     end
 
     methods 
@@ -44,9 +42,6 @@ classdef    qLearner < handle
         if ~isfield(params,'lrv2')
             obj.lrv2 = obj.lrv;
         end     
-%         if obj.confirmayory && obj.FvsCF
-%             error('Learner cannot have confirmatory bias and factual bias at the same time');
-%         end
     end
     
         function learn(obj, a, r)
@@ -97,8 +92,8 @@ classdef    qLearner < handle
                 Q1 = randn(1000, 1,1)*sqrt(obj.V(1))+obj.Q(1); %sampled values from current prior distribution of option1
                 Q2 = randn(1000, 1,1)*sqrt(obj.V(2))+obj.Q(2); %sampled values from current prior distribution of option2
 
-                pQ2 = sum(Q2>Q1)/numel(Q1); %probability of choosing action 1 is equal to the proportion of sampled  
-                                            %values of Q1 that are higher than sampled values from Q2  
+                pQ2 = sum(Q2>Q1)/numel(Q1); %probability of choosing action 2 is equal to the proportion of sampled  
+                                            %values of Q2 that are higher than sampled values from Q1
                 if (obj.V(1)== 0 || obj.V(2) ==0);
                     pQ2 = .5;
                 elseif pQ2 == 1
@@ -115,16 +110,14 @@ classdef    qLearner < handle
         end
         
         function [action,p] = chooseActionSigmoid(obj)
-                %state: number representing state
-                %
                 %Outputs:
                 %action: (1 or 2)
-                %p: Probability of having chosen action based on the state
+                %p: Probability of having chosen action 
       
            Q2 = obj.Q(2);
            Q1 = obj.Q(1);
            
-           dQ = (Q2 - Q1)./100; % correct vs incorrect
+           dQ = (Q2 - Q1)./100; %divided by 100 to keep dQ between 0 and 1
            
            pc = 1./(1+exp(-dQ.*obj.beta));
            action = double(rand<pc) + 1;
@@ -146,7 +139,6 @@ classdef    qLearner < handle
            V2 = obj.V(2);
            V1 = obj.V(1);
            
-%             integral(@(x)(-exp(-lambda.*x).*exp(-((x-M).^2./(2.*V)))),-Inf,Inf)/sqrt(2*pi*V)
 %            SP2 = (1/sqrt(2*pi*V2)).*integral(@(x)(exp((-((x-Q2).^2./(2.*V2))))),obj.T, Inf);
 %            SP1 = (1/sqrt(2*pi*V1)).*integral(@(x)(exp((-((x-Q1).^2./(2.*V1))))),obj.T, Inf);
            SP2 = 1-normcdf(obj.T,Q2,sqrt(V2));

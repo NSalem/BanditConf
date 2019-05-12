@@ -27,7 +27,7 @@ Main analysis scripts:
 - modelConfusion: does bayesian model comparison on the simulations, producing a confusion matrix for the models (showing the frequency with which each model is deemed best for each generative model).  
 
 ## Models
-I test different biases to analyse their ability to replicate human behavior (choice and confidence reports). At the learning stage, I test variations of an optimisticbias (i.e., updating the subjective values more for positive than for negative prediction errors), and at the action/confidence selection stage, I test a satisficing criterion (softmax function over the difference in probability of a “good enough” outcome for each option) versus random exploration (softmax function over learnt means), and [Thompson sampling (Thompson, 1933)](https://www.dropbox.com/s/yhn9prnr5bz0156/1933-thompson.pdf)(i.e. the probability of choosing option A matches the probability that A it gives a higher reward than B).
+I test different biases to analyse their ability to replicate human behavior (choice and confidence reports). At the learning stage, I test variations of an optimistic bias (i.e., updating the subjective values more for positive than for negative prediction errors), and at the action/confidence selection stage, I test a satisficing criterion (as seen on [Hertz et al (2018)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0195399), softmax function over the difference in probability of a “good enough” outcome for each option) versus random exploration (softmax function over learnt means), and [Thompson sampling (Thompson, 1933)](https://www.dropbox.com/s/yhn9prnr5bz0156/1933-thompson.pdf)(i.e. the probability of choosing option A matches the probability that A it gives a higher reward than B). 
 
 I test 8 different models, varying whether they learn about the outcome variance, the type of learning bias (none, mean, and variance; more details below) and the action selection:
 
@@ -54,10 +54,10 @@ To make use of the learnt variance for choice, this model uses [Thompson samplin
 Same as Q1V1, but with two learning rates for the means (as Q2)
 
 ### Q1V2 
-Same as Q1V1, but with two learning rates for the _variances_ of the outcomes.
+Same as Q1V1, but with two learning rates for the _variances_ of the outcomes. This is inspired by the idea that the value of more pleasant stimuli is encoded with more precision ([Polania, Woodford, and Ruff,2019](https://www.ncbi.nlm.nih.gov/pubmed/30559477)).
 
 ### Q1V1-T, Q2V1-T, Q1V2-T
-These are versions of Q1V1, Q2V1, and Q1V2 with a "satisficing" choice rule, calculating the probability that the oputcome of each option is bigger than a threshold (T), (cummulative density function of T given the learnt distribution mean and sd). Then these probabilities are input into a softmax function. Additionally, there is some decay in the learnt value of the unchosen option, such that it drifts towards the treshold: 
+These are versions of Q1V1, Q2V1, and Q1V2 with a "satisficing" choice rule, which calculates the probability that the oputcome of each option is bigger than a threshold (T), (cummulative density function of T given the learnt distribution mean and sd). Then these probabilities are input into a softmax function. Additionally, there is some decay in the learnt value of the unchosen option, such that it drifts towards the treshold: 
 <img src="./Figures/driftQ.PNG">
 
 Notice the drift happens according to the learning rate of the mean. For Q2V1,there are two learning rates (for positive and negative prediction errors). I (somewhat arbitrarily) used the one for positive prediction errors.
@@ -75,7 +75,7 @@ The model that predicts choice better accross participants is Q1, with a protect
 The model that predicts confidence better accross participants seems to be Q2V1 (protected exceedance probability >.99), that is, a model that learns the outcome means optimistically and that uses information about the outcome variance.
 
 ### Model identifiability
-We have seen that models Q1 and Q2V1 offer the best explanation of choice and confidence respectively, but two different models could produce the same output if the conditions in which they are tested are limited. What if the task is not suited to unbiasedly distinguish well between the models? To test that, one can run simulations for each model, fit all models on the simulated behaviors, and count how many times the correct generative model would be deemed the best by model comparison. This allows to create a matrix like this:
+We have seen that models Q1 and Q2V1 offer the best explanation of choice and confidence respectively, but two different models could produce the same output if the conditions in which they are tested are limited. What if the task is not suited to unbiasedly distinguish well between the models? To test that, one can run simulations for each model, fit all models on the simulated behaviors, and count how many times the correct generative model would be deemed the best by model comparison [(Wyart, Palminteri and Koechlin,2017)](https://www.ncbi.nlm.nih.gov/pubmed/28476348). This allows to create a matrix like this:
 <img src="./Plots/model_confusion.png">
 Where the desirable scenario is to have a "very diagonal" matrix. Unifortunately, it is not the case here, it seems there is a strong bias towards models with fewer parameters, such that Q1 is considered the best when Q2 is the real underlying model. A similar thing happens for Q2V1 and Q1V2, which are confused with Q1V1. The models using the "satisficing choice rule" are also confused with Q1. Therefore, regardless of the model comparison done above, we cannot say with precision that Q2V1 is better at explaining confidence than Q1V1, since the task is not suited to distiniguish between both. The only possible distinction seems to be between models that use variance to guide choice (Q1V1,Q2V1,Q1V2) and models that do not (Q1,Q2).
 

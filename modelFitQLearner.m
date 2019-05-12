@@ -26,4 +26,4 @@ for imodel = whichmodels;
     end
 end
 
-save('Results\model_fitsMAP_exp1','parameters','LPP', 'modelsinfo','bic', 'aic')
+save('Results\model_fitsMAP_exp1','parameters','LPP', 'modelsinfo','bic', 'aic','ll')

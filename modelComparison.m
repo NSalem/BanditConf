@@ -1,5 +1,5 @@
-% load('Results\model_fitsMLE_exp1');
-load('Results\model_fitsMAP_exp1');
+load('Results\model_fitsMLE_exp1');
+% load('Results\model_fitsMAP_exp1');
 
 addpath('ModelingFuncs\')
 addpath('helperfuncs')

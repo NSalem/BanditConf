@@ -1,6 +1,8 @@
 %%% test model and parameter identifiability with synthetic data%%%
 %%% populations are generated for each model, and their resulting behavior (choices
 %%% and confidence) is fitted on each model 
+%%% modelConfusion.m can be ran on these results afterwards to show the
+%%% actual confusion matrix;
 
 clear 
 close all
@@ -30,10 +32,6 @@ estimateML = 0;
  gen.T = @()random('Beta',1.1,1.1)*100;
 
 
-% load parameters from model fits
-% load ('model_fits.mat','parameters','modelsinfo')
-% fittedParams = parameters;
-
 clear parameters;
 
 %% initialize arrays, etc
@@ -59,7 +57,7 @@ aic= zeros(n_sims, n_sub, n_models,n_models);
 bic = zeros(n_sims, n_sub, n_models,n_models);
    
 %% start simulations
-kk = 0;
+
 for isim = 1:n_sims
     for igenmodel = 1:n_models
         for isub =1:n_sub
@@ -74,8 +72,6 @@ for isim = 1:n_sims
                 thisParam = modelsinfo{igenmodel}.paramnames{iparam};
                 paramstructgen.(thisParam) = gen.(thisParam)();
                 genparams{isim,isub,igenmodel} = [genparams{isim,isub,igenmodel},paramstructgen.(thisParam)];
-%                 paramstructgen.(thisParam) = fittedParams{igenmodel}(isub,iparam);
-%                 genparams{isim,isub,igenmodel} = fittedParams{igenmodel}(isub,iparam);
             end
                 
 
@@ -95,11 +91,6 @@ for isim = 1:n_sims
                 end
                 sigmaQ = Q_c+Q_uc;
 
-             
-                %%% simulate confidence %%%                
-
-                %%%%%%%%%%%%%%%%%%%%%%%%%%
-                %%%%%%%%%%%%%%%%%%%%%%%%%%
                 
             for irecmodel = 1:n_models
                 lb = modelsinfo{irecmodel}.lb;
@@ -109,28 +100,11 @@ for isim = 1:n_sims
                 disp(['Gen.Model ',num2str(igenmodel), ' ', 'Rec.Model ', num2str(irecmodel)])
                 disp(['Subj ', num2str(isub), '/',num2str(n_sub)])
 
-                if igenmodel == n_models && irecmodel == n_models
-                    kk=kk+1;
-%                     corr_mat(isub,:,:) = transpose(squeeze(mean(reshape((a-1)',ntrials),3)));
-                    %                 corr_mat(isub,:,:) = squeeze(nanmean(reshape((a-1)',3,4,ntrials),1));
-%                     con_mat(isub,:,:) = transpose(squeeze(mean(reshape(conf',ntrials,4,n_sess),3)));
-                    %con_mat(isub,:,:) = squeeze(nanmean(reshape(conf(:)',3,4,ntrials),1));
-                end
-
                 options = optimset('Algorithm', 'interior-point', 'Display', 'final', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
                 
 
                 if estimateLPP
-                    % LPP (Laplace appriximation of the posterior probability) optimization    
-                                       % LPP (Laplace appriximation of the posterior probability) optimization    
-%                     [parametersLPP{isim,isub,igenmodel,irecmodel},LPP(isim,isub,igenmodel,irecmodel),~,~,~,~,hessian]=fmincon(@(x) GetModelLL_QLearner(x,modelsinfo{irecmodel},s,a,r,c,aa,ss,1),x0,[],[],[],[],lb,ub,[],options);
-%                     thisLPP = LPP(isim,isub,igenmodel,irecmodel);
-%                     k = numel(modelsinfo{irecmodel}.paramnames);
-%                     LAME(isim,isub,igenmodel,irecmodel) =  thisLPP + k/2*log(2*pi) - real(log(det(hessian))/2);%Laplace-approximated model evidence
-%                     this_ll = GetModelLL_QLearner(parametersLPP{isim,isub,igenmodel,irecmodel},modelsinfo{irecmodel},s,a,r,c,aa,ss,0);
-
                     [parametersLPP{isim,isub,igenmodel,irecmodel},LPP(isim,isub,igenmodel,irecmodel),~,~,~,~,hessian]=fmincon(@(x) GetModelLL_QLearner(x,modelsinfo{irecmodel},a,r,1),x0,[],[],[],[],lb,ub,[],options);
-%                     LPP(isim,isub,igenmodel,irecmodel) = this_LPP;
                     nfpm = numel(modelsinfo{irecmodel}.paramnames);
                     this_ll = GetModelLL_QLearner(parametersLPP{isim,isub,igenmodel,irecmodel},modelsinfo{irecmodel},a,r,0);
                     bic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+nfpm*log(ntrials);

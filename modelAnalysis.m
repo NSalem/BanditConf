@@ -1,14 +1,29 @@
+function modelAnalysis(filename,whichmodels)
+    %%% filename: path to file containing parameters of model fit (default
+    %%% 'Results\model_fitsMAP_exp1.mat')
+    %%% whichmodels: vector of models to test (default all [1:8])
+    %%% doSave: bool, whether to save the plots (default yes)
+    if nargin<3
+        doSave = 1;
+    end
+    if nargin<1 || isempty(filename)
+        filename = 'Results\model_fitsMAP_exp1.mat';
+    end
+    
+    load(filename);
+    
+    if nargin<2||isempty(whichmodels)
+        whichmodels = 1:numel(modelsinfo);
+    end
+
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-% load('Results\model_fitsMLE_exp1.mat');
-load('Results\model_fitsMAP_exp1.mat');
 
 loadExp1;
 ChoicesOrig = Choices;
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
 
-whichmodels = 1:numel(parameters);
 nmodels = numel(whichmodels);
 
 allabels= {'Q1','Q2','Q1V1','Q2V1','Q1V2','Q1V1-T','Q2V1-T','Q1V2-T'}
@@ -57,6 +72,12 @@ modelcolors = [
 ]/255;
 
 
+if numel(whichmodels) == numel(whichmodels(1):whichmodels(end)) && all(whichmodels== whichmodels(1):whichmodels(end))
+    modelsStr = sprintf('_models%dto%d',[whichmodels(1),whichmodels(end)]);
+else 
+    modelsStr = ['_models',sprintf('_%d',whichmodels)];
+end
+
 %% analyze only 4 conditions described in paper
 
 vars = [10,25];
@@ -93,28 +114,11 @@ for ivb = 1:numel(vars)
                  Q2AllConds = Q2_cond(imodel,:,:,isub,:);
                  QGood =  max(Q2AllConds(:),Q1AllConds(:));
                  QBad =  min(Q2AllConds(:),Q1AllConds(:));
-                 
-                if ivb == 2 && ivg ==2
-                    varnames= {'confidence', 'modelpcorr','QGood','QBad'}
-                    tbl = table(confAllConds(:),pcAllConds(:),QGood,QBad,'VariableNames', varnames);  
-                    regThisSub = fitlm(tbl,'confidence ~ 1+modelpcorr');
-                    BIC(isub, imodel) =   regThisSub.ModelCriterion.BIC;
-                    coeffs(isub,imodel,:) = regThisSub.Coefficients.Estimate;
-                    conft(isub,imodel,:) = regThisSub.Coefficients.tStat;
-
-                    RMSE(isub,imodel,:) = regThisSub.RMSE;
-                end
             end
         end
     end
 end
 
-[selr,c] = find(~isinf(BIC));%
-BIC = BIC(selr,:); 
-% measureMean = squeeze(mean(corr_cond,3));
-% measureSe = squeeze(std(corr_cond,[],3)/sqrt(size(conf_cond,3)));
-% confmean = squeeze(mean(corr_cond,3));
-% confse = squeeze(std(corr_cond,[],3)/sqrt(size(conf_cond,3)));
 pcmean  =squeeze(mean(model_pc_cond,4));
 pcse = squeeze(std(model_pc_cond,[],4)/sqrt(size(model_pc_cond,4)));
 
@@ -125,8 +129,12 @@ for imeasure = 1:2
     
     if imeasure ==1
         thisMeasure = corr_cond;
+        thisYlabel = 'p correct';
+        plotfilename = ['timecourse_accuracy'];
     else
         thisMeasure = (conf_cond-1)/10+.5;
+        thisYlabel = 'Confidence';
+        plotfilename = ['timecourse_conf'];
     end
 
     measureMean = squeeze(mean(thisMeasure,3));
@@ -140,24 +148,24 @@ for imeasure = 1:2
             subplot(2,2,i)
     %         shadedErrorBar([1:25],squeeze(corrmean(ivb,ivg,:)),squeeze(corrse(ivb,ivg,:)));
             errorbar([1:25],squeeze(measureMean(ivb,ivg,:)),squeeze(measureSe(ivb,ivg,:)),':k');
-            ylim([.4,1])
+            ylim([.5,1])
             for imodel = whichmodels
                 s = shadedErrorBar([1:25],squeeze(pcmean(imodel,ivb,ivg,:)),squeeze(pcse(imodel,ivb,ivg,:)));
                 s.mainLine.Color = modelcolors(imodel,:);
-                s.mainLine.LineWidth = 3;
+                s.mainLine.LineWidth = 1;
                 s.edge.delete;
                 s.patch.FaceColor = modelcolors(imodel,:);
-                s.patch.FaceAlpha = 0.6;
+                s.patch.FaceAlpha = 0.2;
                 s.patch.EdgeColor = modelcolors(imodel,:);
-                s.patch.EdgeAlpha = 1;
+                s.patch.EdgeAlpha = 0.2;
     %             s.edge.Color
             end
             xlabel('Trial')
-            ylabel('p correct')
+            ylabel(thisYlabel)
         end
     end
 
-    legend({'data',modellabels{:}})
+%     legend({'data',modellabels{:}})
 
 
     condcolors = [6  95  37; 
@@ -165,7 +173,8 @@ for imeasure = 1:2
             155 136 21;
             240 213 49]/255;
      condcolors = condcolors(end:-1:1,:);
-
+    set(gcf,'Position', [100,100,500,650])
+    saveas(gcf,['Plots\',plotfilename,modelsStr,'.png'])
 end
 % corrcond_m = mean(mean(corr_cond,4),3);
 % corrcond_se = std(mean(corr_cond,4),[],3)./sqrt(size(corr_cond,3));
@@ -177,15 +186,14 @@ mcorrcon = squeeze(mean(corr_cond,4));
 mcorrcon = reshape(mcorrcon,4,65);
 
 mmodelpccon = mean(model_pc_cond,5);
-mmodelpccon = reshape(mmodelpccon,nmodels,4,65);
+mmodelpccon = reshape(mmodelpccon,whichmodels(end),4,65);
 modelmean = squeeze(mean(mmodelpccon,3));
 modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % std(pcmean,[]/4)/sqrt(size;
 
 figure()
-% errorbar(corrcond_m(:),corrcond_se(:))
-
-pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1.1,12,'','Condition','p correct')
+plotfilename = 'accuracy_cond'
+pirateplot(mcorrcon,repmat(condcolors,4,1),0.,1,12,'','Condition','p correct')
 % plot(mcorrcon,'Color',[.8,.8,.8]);
 hold on
 plot([0,5],[.5,.5],':k')
@@ -195,17 +203,17 @@ for imodel = whichmodels
         y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar),modelse(imodel,ibar),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
     end
 end
-legend(y,modellabels, 'Location', 'southeastoutside')
+legend(y(whichmodels),modellabels, 'Location', 'southeastoutside')
 % hold on
 % shadedErrorBar([1:240],squeeze(Q(1,2,1:240)),sqrt(squeeze(V(1,2,1:240))))
-
+saveas(gcf,['Plots\',plotfilename,modelsStr,'.png'])
 
 %% plot avg conf per condition 
 mconfcon = squeeze(mean(conf_cond,4));
 mconfcon = reshape(mconfcon,4,65);
 
 mmodelpccon = mean(model_pc_cond,5);
-mmodelpccon = reshape(mmodelpccon,nmodels,4,65);
+mmodelpccon = reshape(mmodelpccon,whichmodels(end),4,65);
 modelmean = squeeze(mean(mmodelpccon,3));
 modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 % std(pcmean,[]/4)/sqrt(size;
@@ -214,16 +222,19 @@ modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
 
  %% plot confidence accross conditions
 figure()
-pirateplot(mconfcon,repmat(condcolors,4,1),1,6,12,'','Condition','Confidence')
+plotfilename = 'confidence_cond'
+pirateplot((mconfcon-1)/10+.5,repmat(condcolors,4,1),0.5,1,12,'','Condition','Confidence')
 xticklabels({'vLvL','vLvH','vHvL','vHvH'})
 hold on
 % plot([0,5],[.5,.5],':k')
 for imodel = whichmodels
     for ibar = 1:4
-        y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar)*6,modelse(imodel,ibar)*6,['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
+        y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar),modelse(imodel,ibar),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
     end
 end
-legend(y,modellabels, 'Location', 'southeastoutside')
+legend(y(whichmodels),modellabels, 'Location', 'southeastoutside')
+saveas(gcf,['Plots\',plotfilename,modelsStr,'.png'])
+
 
 % %% plot calibration
 % figure()

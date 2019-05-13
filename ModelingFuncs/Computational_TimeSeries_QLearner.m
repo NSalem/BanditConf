@@ -3,13 +3,13 @@ function [Q,V,pc,PE] = Computational_TimeSeries_QLearner(params,a,r)
 l = qLearner(params);
 ntrials = length(a);
 
-Q       = zeros(2,ntrials);        % Initial option values (all Models) as a function of conditio ("s")
-V       = zeros(2,ntrials);        % Initial Var
+Q       = zeros(2,ntrials);        % Initial (subjective) mean
+V       = zeros(2,ntrials);        % Initial (subjective) variance
 pc      = ones(1,ntrials)*.5;
 
 for i = 1:length(a)
     if ~isnan(a(i))
-        %%% get probability of action being correct given current values 
+        %%% get probability of action=2 given current values 
         [dum_action,trl_pc] = l.chooseAction(); 
         if dum_action ~=2
             trl_pc = 1-trl_pc; 

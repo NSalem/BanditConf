@@ -68,7 +68,7 @@ Notice the drift happens according to the learning rate of the mean. For Q2V1,th
 ### Best model for choice 
 Each model parameters are fitted to maximize the likelihood of the observed choices for each participant. Based on the likelihood, I calculated the BIC for each participant and model, and then input this matrix into Bayesian model comparison to output estimated model frequencies: 
 <img src="./Plots/model_comparison_choice.png">
-The model that predicts choice better accross participants is Q1, with a protected exceedance probability >.99. That is, it would seem tha participants do not take outcome variance into account, and learn equally well from possitive and negative surprises.
+The model that predicts choice best accross participants is Q1, with a protected exceedance probability >.99. That is, it would seem tha participants do not take outcome variance into account, and learn equally well from possitive and negative surprises.
 
 ### Best model for confidence
 For doing Bayesian model comparison on confidence, I regressed each subject's trial-by-trial confidence reports on each model's time-course of the probability of correct choice, and obtained the BIC from these regressions.

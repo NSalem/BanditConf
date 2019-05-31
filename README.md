@@ -74,7 +74,7 @@ The model that predicts choice best accross participants is Q1, with a protected
 For doing Bayesian model comparison on confidence, I regressed each subject's trial-by-trial confidence reports on each model's time-course of the probability of correct choice, and obtained the BIC from these regressions.
 
 <img src="./Plots/model_comparison_conf.png">
-The model that predicts confidence better accross participants seems to be Q2V1 (protected exceedance probability >.99), that is, a model that learns the outcome means optimistically and that uses information about the outcome variance.
+The model that predicts confidence best accross participants seems to be Q2V1 (protected exceedance probability >.99), that is, a model that learns the outcome means optimistically and that uses information about the outcome variance.
 
 ### Model identifiability
 We have seen that models Q1 and Q2V1 offer the best explanation of choice and confidence respectively, but two different models could produce the same output if the conditions in which they are tested are limited. What if the task is not suited to unbiasedly distinguish well between the models? To test that, one can run simulations for each model, fit all models on the simulated behaviors, and count how many times the correct generative model would be deemed the best by model comparison [(Wyart, Palminteri and Koechlin,2017)](https://www.ncbi.nlm.nih.gov/pubmed/28476348). This allows to create a matrix like this:

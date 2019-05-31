@@ -138,7 +138,8 @@ function modelSimulateSubjParams(filename,whichmodels,nsims)
 
     pcmean  =squeeze(mean(model_pc_cond,4));
     pcse = squeeze(std(model_pc_cond,[],4)/sqrt(size(model_pc_cond,4)));
-
+ 
+    save('Results\model_sims_subjparams.mat')
 
     %% plot timecourse per condition 
 
@@ -214,7 +215,7 @@ function modelSimulateSubjParams(filename,whichmodels,nsims)
     % plot(mcorrcon,'Color',[.8,.8,.8]);
     hold on
     plot([0,5],[.5,.5],':k')
-    xticklabels({'vLvL','vLvH','vHvL','vHvH'})
+    xticklabels({'vLvL','vHvL','vLvH','vHvH'})
     for imodel = whichmodels
         for ibar = 1:4
             y(imodel) = errorbar(ibar-(4-imodel)*0.1,modelmean(imodel,ibar),modelse(imodel,ibar),['k',modelmarkers{imodel}],'MarkerFaceColor', modelcolors(imodel,:))
@@ -241,7 +242,8 @@ function modelSimulateSubjParams(filename,whichmodels,nsims)
     figure()
     plotfilename = 'resim_confidence_cond'
     pirateplot((mconfcon-1)/10+.5,repmat(condcolors,4,1),0.5,1,12,'','Condition','Confidence')
-    xticklabels({'vLvL','vLvH','vHvL','vHvH'})
+    
+    xticklabels({'vLvL','vHvL','vLvH','vHvH'})
     hold on
     % plot([0,5],[.5,.5],':k')
     for imodel = whichmodels

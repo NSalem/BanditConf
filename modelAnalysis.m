@@ -121,7 +121,7 @@ end
 
 pcmean  =squeeze(mean(model_pc_cond,4));
 pcse = squeeze(std(model_pc_cond,[],4)/sqrt(size(model_pc_cond,4)));
-
+    save('Results\model_fits_patterns.mat')
 
 %% plot timecourse per condition 
 

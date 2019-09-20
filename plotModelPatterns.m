@@ -1,4 +1,9 @@
  
+%  load('Results\model_sims_subjparams.mat')
+ 
+load('Results\model_fits_patterns.mat')
+
+
 trlsel = [1:25];
 %% plot avg accuracy per condition
 %     modelmarkers = {'^','^','d','d','d','o','o','o'}

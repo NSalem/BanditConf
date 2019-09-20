@@ -11,15 +11,15 @@ addpath('helperfuncs\')
 outfilename = 'model_simulations_results_exp1.mat';
 loadExp1; %load experiment 1 to use the same probability distributions for outcomes
 
-n_sims      = 50;
-n_sub       = size(Choices,2);
+nsims      = 50;
+nsub       = size(Choices,2);
 ntrials = size(Choices,1);
 estimateLPP = 1;
 estimateML = 0;
 
 
  loadModelsInfo;
- n_models = numel(modelsinfo);
+ nmodels = numel(modelsinfo);
 
 %% establish distribution of generative parameters
 
@@ -36,31 +36,38 @@ clear parameters;
 
 %% initialize arrays, etc
 % n_models = numel(modelsinfo);
-parametersLPP = {};
-parametersLPP = {};
-LPP = nan(n_sims, n_sub, n_models,n_models); %LPP matrix of generative models by recovered models for each subj and sim
-ll = zeros(n_sims, n_sub, n_models,n_models);
-recfreqs.LL = zeros(n_models,n_models);
-recfreqs.AIC = zeros(n_models,n_models);
-recfreqs.BIC = zeros(n_models,n_models);
-recfreqs.LAME = zeros(n_models,n_models);
-recfreqs.regressBIC = zeros(n_models,n_models);
-recfreqs.regressAIC = zeros(n_models,n_models);
+parametersLPP = cell(nsims,nsub,nmodels,nmodels);
+genparams = cell(nsims,nsub,nmodels);
+reportLPP = cell(nsims,nsub,nmodels,nmodels);
+LPP  = NaN(nsims,nsub,nmodels,nmodels);
+gradientLPP = cell(nsims,nsub,nmodels,nmodels);
+hessianLPP = cell(nsims,nsub,nmodels,nmodels);
+LAME = NaN(nsims,nsub,nmodels,nmodels);
+ll = NaN(nsims,nsub,nmodels,nmodels);
 
-pxps.LL = zeros(n_sims, n_models, n_models);
-pxps.AIC = zeros(n_sims, n_models, n_models);
-pxps.BIC = zeros(n_sims, n_models, n_models);
-pxps.regressBIC = zeros(n_sims, n_models, n_models);
-pxps.regressAIC = zeros(n_sims, n_models, n_models);
+LPP = nan(nsims, nsub, nmodels,nmodels); %LPP matrix of generative models by recovered models for each subj and sim
+ll = zeros(nsims, nsub, nmodels,nmodels);
+recfreqs.LL = zeros(nmodels,nmodels);
+recfreqs.AIC = zeros(nmodels,nmodels);
+recfreqs.BIC = zeros(nmodels,nmodels);
+recfreqs.LAME = zeros(nmodels,nmodels);
+recfreqs.regressBIC = zeros(nmodels,nmodels);
+recfreqs.regressAIC = zeros(nmodels,nmodels);
 
-aic= zeros(n_sims, n_sub, n_models,n_models);
-bic = zeros(n_sims, n_sub, n_models,n_models);
+pxps.LL = zeros(nsims, nmodels, nmodels);
+pxps.AIC = zeros(nsims, nmodels, nmodels);
+pxps.BIC = zeros(nsims, nmodels, nmodels);
+pxps.regressBIC = zeros(nsims, nmodels, nmodels);
+pxps.regressAIC = zeros(nsims, nmodels, nmodels);
+
+aic= zeros(nsims, nsub, nmodels,nmodels);
+bic = zeros(nsims, nsub, nmodels,nmodels);
    
 %% start simulations
 
-for isim = 1:n_sims
-    for igenmodel = 1:n_models
-        for isub =1:n_sub
+for isim = 1:nsims
+    for igenmodel = 1:nmodels
+        for isub =1:nsub
             OUT(1,:) = round(randn(size(Pl,1),1).*Vl(:,isub)+Pl(:,isub));
             OUT(2,:) = round(randn(size(Pl,1),1).*Vr(:,isub)+Pr(:,isub));
             OUT(OUT<5) = 5;
@@ -92,48 +99,44 @@ for isim = 1:n_sims
                 sigmaQ = Q_c+Q_uc;
 
                 
-            for irecmodel = 1:n_models
+            parfor irecmodel = 1:nmodels
                 lb = modelsinfo{irecmodel}.lb;
                 ub = modelsinfo{irecmodel}.ub;
                 x0 = modelsinfo{irecmodel}.x0;
-                disp(['Simulation ', num2str(isim), '/',num2str(n_sims)])
+                disp(['Simulation ', num2str(isim), '/',num2str(nsims)])
                 disp(['Gen.Model ',num2str(igenmodel), ' ', 'Rec.Model ', num2str(irecmodel)])
-                disp(['Subj ', num2str(isub), '/',num2str(n_sub)])
+                disp(['Subj ', num2str(isub), '/',num2str(nsub)])
 
                 options = optimset('Algorithm', 'interior-point', 'Display', 'final', 'MaxIter', 10000); % These increase the number of iterations to ensure the convergence
                 
 
                 if estimateLPP
-                    [parametersLPP{isim,isub,igenmodel,irecmodel},LPP(isim,isub,igenmodel,irecmodel),~,~,~,~,hessian]=fmincon(@(x) GetModelLL_QLearner(x,modelsinfo{irecmodel},a,r,1),x0,[],[],[],[],lb,ub,[],options);
-                    nfpm = numel(modelsinfo{irecmodel}.paramnames);
+                    [parametersLPP{isim,isub,igenmodel,irecmodel},thisLPP,~,~,~,~,hessian]=fmincon(@(x) GetModelLL_QLearner(x,modelsinfo{irecmodel},a,r,1),x0,[],[],[],[],lb,ub,[],options);
+                    k = numel(modelsinfo{irecmodel}.paramnames);
+                    LPP(isim,isub,igenmodel,irecmodel) = thisLPP;
                     this_ll = GetModelLL_QLearner(parametersLPP{isim,isub,igenmodel,irecmodel},modelsinfo{irecmodel},a,r,0);
-                    bic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+nfpm*log(ntrials);
-                    aic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+nfpm; 
-                    
+                    bic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+k*log(ntrials);
+                    aic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+k; 
+                    LAME(isim, isub,igenmodel,irecmodel) =  thisLPP + k/2*log(2*pi) - real(log(det(hessian))/2);%Laplace-approximated imodel evidence
                 end
-
                 paramstructrec = modelsinfo{irecmodel};
                 params = parametersLPP{isim,isub,igenmodel,irecmodel};
                 paramnames = modelsinfo{irecmodel}.paramnames;
                 for ipar = 1:numel(paramnames)
                     paramstructrec.(char(paramnames(ipar))) = params(ipar);
                 end
-                
-%                 [Q,V,~,~,~,~,dQ_post, V_post] = Computational_TimeSeries_QLearner(paramstructrec,s,a,r,c,aa,ss);
-%                 dQ = squeeze(Q(:,2,1:24)-Q(:,1,1:24));
-%                 V = V(:,1:24);
             end
         end
     end
     if ~exist(['Results',filesep,outfilename])
-        save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP', 'parametersLPP', 'genparams', 'ntrials', 'n_sims', 'modelsinfo')
+        save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LAME','LPP', 'parametersLPP', 'genparams', 'ntrials', 'nsims', 'modelsinfo')
     else
-        save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP', 'parametersLPP', 'genparams', 'ntrials', 'n_sims', 'modelsinfo','-append')
+        save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LAME','LPP', 'parametersLPP', 'genparams', 'ntrials', 'nsims', 'modelsinfo','-append')
     end
 end
 
 % con_mat2 = (con_mat-max(con_mat(:)))/((max(con_mat(:))-min(con_mat(:))))*(1-0.5)+1;%green = '\color[rgb]{0,1,0}'
 n_sub_all = size(corr_mat,1);
 
-save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic', 'LPP','parametersLPP', 'genparams','ntrials', 'n_sims', 'modelsinfo')
+save(['Results',filesep,outfilename], 'recfreqs','pxps', 'aic', 'bic','LAME','LPP','parametersLPP', 'genparams','ntrials', 'nsims', 'modelsinfo')
 

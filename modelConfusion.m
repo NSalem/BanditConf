@@ -20,8 +20,8 @@ function modelConfusion(filename,whichmodels,doSave)
     options.DisplayWin =0;
     confusionMat = zeros(numel(whichmodels),numel(whichmodels));
 
-    criterion = bic;
-    [selr,~] = find(criterion~=0);%
+    criterion = LAME;
+    [selr,~] = find(criterion~=0 & ~isnan(criterion));%
     criterion = criterion(unique(selr),:,:,:);
     for isim = 1:size(criterion,1)
         for igenmodel = 1:numel(whichmodels)

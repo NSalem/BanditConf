@@ -8,7 +8,7 @@ ChoicesOrig = Choices;
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
 
-whichmodels = 1:5;%1:numel(parameters);
+whichmodels = 1:numel(parameters);
 nmodels = numel(whichmodels);
 
 allabels= {'Q1','Q2','Q1V1','Q2V1','Q1V2','Q1V1-T','Q2V1-T','Q1V2-T'}

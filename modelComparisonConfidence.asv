@@ -77,7 +77,7 @@ for ivb = 1:numel(vars)
 %                 elseif imodel >=3 && imodel<6
 %                      modelconf(imodel,ivb,ivg,isub,:)  = abs(p_all(imodel,isub,sel)-(1-p_all(imodel,isub,sel)));
 %                 end
-                modelconf(imodel,ivb,ivg,isub,:)= conf_all(imodel,isub,sel);
+                modelconf(imodel,ivb,ivg,isub,:)= conf(imodel,isub,sel);
 
                 Q1_cond(imodel,ivb,ivg,isub,:) = Q_all(imodel,isub,1,sel);
                 Q2_cond(imodel,ivb,ivg,isub,:) = Q_all(imodel,isub,2,sel);
@@ -117,7 +117,7 @@ selr = 1:size(BIC,1);
 selr(deselr) = [];
 BIC = BIC(selr,:); 
 
-save('Results\model_fit_conf2.mat', 'BIC', 'coeffs', 'conft', 'RMSE','modelconf')
+save('Results\model_fit_conf.mat', 'BIC', 'coeffs', 'conft', 'RMSE')
 
 %% model comparison between ALL models
 [postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2)

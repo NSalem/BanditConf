@@ -72,18 +72,18 @@ classdef    qLearner < handle
         end
         
 
-        function [action,p,conf,confUnchosen] = chooseAction(obj) 
+        function [action,p] = chooseAction(obj) 
             if isprop(obj,'T') && ~isempty(obj.T) 
-                [action,p,conf,confUnchosen] = chooseActionThresholdSigmoid(obj);
+                [action,p] = chooseActionThresholdSigmoid(obj);
             elseif isprop(obj,'lrv') && ~isempty(obj.lrv) 
-                [action,p,conf,confUnchosen] = chooseActionThompson(obj);
+                [action,p] = chooseActionThompson(obj);
             elseif isprop(obj,'beta') && ~isempty(obj.beta)
-                [action,p,conf,confUnchosen]  = chooseActionSigmoid(obj); 
-%             elseif isprop(obj,'sigma') && ~isempty(obj.sigma)
-%                 [action,p,conf,confUnchosen]  = chooseActionFleming(obj);
+                [action,p] = chooseActionSigmoid(obj); 
+            elseif isprop(obj,'sigma') && ~isempty(obj.sigma)
+                [action,p] = chooseActionFleming(obj);
             end
         end
-        function [action,p,conf,confUnchosen] = chooseActionThompson(obj)
+        function [action,p] = chooseActionThompson(obj)
                     %state: number representing state
                     %
                     %Outputs:
@@ -105,22 +105,40 @@ classdef    qLearner < handle
                 action = double(rand<pQ2)+1; %action, 1 or 2
                 if action == 2
                     p = pQ2;
-                    d = obj.Q(2)-obj.Q(1);
-%                     conf = obj.Q(2);confUnchosen = obj.Q(1);
                 else
                     p = 1-pQ2;
-                    d = obj.Q(1)-obj.Q(2);
-%                     conf = obj.Q(1); confUnchosen = obj.Q(2);
                 end
-%                 conf = p;
-%                 confUnchosen = 1-p;
-           noise =  sqrt(obj.V(1))+sqrt(obj.V(2));
-           conf = (normpdf(d,d,noise))/((normpdf(d,d,noise))+(normpdf(d,-d,noise)));
-           confUnchosen = (normpdf(d,-d,noise))/((normpdf(d,d,noise))+(normpdf(d,-d,noise)));
-
         end
         
-        function [action,p,conf,confUnchosen] = chooseActionSigmoid(obj)
+                function [action,p] = chooseActionThompson(obj)
+                    %state: number representing state
+                    %
+                    %Outputs:
+                    %action: (1 or 2)
+                    %p: Probability of having chosen action based on the state
+
+                Q1 = randn(1000, 1,1)*sqrt(obj.V(1))+obj.Q(1); %sampled values from current prior distribution of option1
+                Q2 = randn(1000, 1,1)*sqrt(obj.V(2))+obj.Q(2); %sampled values from current prior distribution of option2
+
+                pQ2 = sum(Q2>Q1)/numel(Q1); %probability of choosing action 2 is equal to the proportion of sampled  
+                                            %values of Q2 that are higher than sampled values from Q1
+                if (obj.V(1)== 0 || obj.V(2) ==0);
+                    pQ2 = .5;
+                elseif pQ2 == 1
+                    pQ2 = 1-1/1000;
+                elseif pQ2 ==0
+                    pQ2 = 1/1000;
+                end
+                action = double(rand<pQ2)+1; %action, 1 or 2
+                if action == 2
+                    p = pQ2;
+                else
+                    p = 1-pQ2;
+                end
+        end
+        
+        
+        function [action,p] = chooseActionSigmoid(obj)
                 %Outputs:
                 %action: (1 or 2)
                 %p: Probability of having chosen action 
@@ -135,18 +153,12 @@ classdef    qLearner < handle
         
            if action == 2
                 p = pc;
-%                 conf = Q2; confUnchosen = Q1;
-                d = dQ;
             else
                 p = 1-pc;
-%                 conf = Q1; confUnchosen = Q2;
-                d = -dQ;
-           end
-           conf = (normpdf(d,d,1./obj.beta*1.6))/((normpdf(d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
-           confUnchosen = (normpdf(d,-d,1./obj.beta*1.6))/((normpdf(d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
+            end
         end
         
-        function [action,p,conf,confUnchosen] = chooseActionThresholdSigmoid(obj)
+        function [action,p] = chooseActionThresholdSigmoid(obj)
                 %Outputs:
                 %action: (1 or 2)
                 %p: Probability of having chosen action 
@@ -170,15 +182,9 @@ classdef    qLearner < handle
         
            if action == 2
                 p = pc;
-                conf = SP2;confUnchosen = SP1;
-                d = dQ;
-           else
+            else
                 p = 1-pc;
-                conf = SP1;confUnchosen = SP2;
-                d = -dQ;
-           end
-           conf = (normpdf(d,d,1./obj.beta*1.6))/((normpdf(d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
-           confUnchosen = (normpdf(d,-d,1./obj.beta*1.6))/((normpdf(-d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
+            end
         end
 
     end

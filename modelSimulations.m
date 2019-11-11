@@ -117,7 +117,7 @@ for isim = 1:nsims
                     this_ll = GetModelLL_QLearner(parametersLPP{isim,isub,igenmodel,irecmodel},modelsinfo{irecmodel},a,r,0);
                     bic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+k*log(ntrials);
                     aic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+k; 
-                    LAME(isim, isub,igenmodel,irecmodel) =  thisLPP + k/2*log(2*pi) - real(log(det(hessian))/2);%Laplace-approximated imodel evidence
+                    LAME(isim, isub,igenmodel,irecmodel) =  thisLPP - k/2*log(2*pi) + real(log(det(hessian))/2);%Laplace-approximated imodel evidence
                 end
                 paramstructrec = modelsinfo{irecmodel};
                 params = parametersLPP{isim,isub,igenmodel,irecmodel};

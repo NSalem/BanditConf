@@ -18,7 +18,7 @@ if ~exist('bic')
 
     end
 end
-    [postBMC,outBMC]  = VBA_groupBMC(-bic(:,:)'/2);
+    [postBMC,outBMC]  = VBA_groupBMC(-LAME(:,:)'/2);
 
    
     figure()

@@ -1,6 +1,7 @@
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-load('Results\model_fitsMAP_exp1V0_3000.mat');
+% load('Results\model_fitsMLE_exp1.mat');
+load('Results\model_fitsMAP_exp1_newmodels.mat');
 
 loadExp1;
 ChoicesOrig = Choices;
@@ -81,22 +82,8 @@ for ivb = 1:numel(vars)
                 Q1_cond(imodel,ivb,ivg,isub,:) = Q_all(imodel,isub,1,sel);
                 Q2_cond(imodel,ivb,ivg,isub,:) = Q_all(imodel,isub,2,sel);
                 
-                V1_cond(imodel,ivb,ivg,isub,:) = V_all(imodel,isub,1,sel);
-                V2_cond(imodel,ivb,ivg,isub,:) = V_all(imodel,isub,2,sel);
+                Qgood(imodel,ivb,ivg,isub,:) = Q2_cond(imodel,ivb,ivg,isub,:).*double(Pr(sel,isub)>Pl(sel,isub));
                 
-                Qgood(imodel,ivb,ivg,isub,:) = squeeze(Q2_cond(imodel,ivb,ivg,isub,:).*all(Pr(sel,isub)>Pl(sel,isub))'+...
-                                               Q1_cond(imodel,ivb,ivg,isub,:).*all(Pr(sel,isub)<Pl(sel,isub))');
-                
-                Qbad(imodel,ivb,ivg,isub,:) = squeeze(Q2_cond(imodel,ivb,ivg,isub,:).*all(Pr(sel,isub)<Pl(sel,isub))'+...
-                                               Q1_cond(imodel,ivb,ivg,isub,:).*all(Pr(sel,isub)>Pl(sel,isub))');
-
-                Vgood(imodel,ivb,ivg,isub,:) = squeeze(V2_cond(imodel,ivb,ivg,isub,:).*all(Pr(sel,isub)>Pl(sel,isub))'+...
-                                               V1_cond(imodel,ivb,ivg,isub,:).*all(Pr(sel,isub)<Pl(sel,isub))');
-                
-                Vbad(imodel,ivb,ivg,isub,:) = squeeze(V2_cond(imodel,ivb,ivg,isub,:).*all(Pr(sel,isub)<Pl(sel,isub))'+...
-                                               V1_cond(imodel,ivb,ivg,isub,:).*all(Pr(sel,isub)>Pl(sel,isub))');
-
-                                           
                  confAllConds = squeeze(conf_cond(:,:,isub,:));
                  pcAllConds = squeeze(model_pc_cond(imodel,:,:,isub,:));
                  modelConfAll = squeeze(modelconf(imodel,:,:,isub,:));
@@ -136,7 +123,7 @@ selr = 1:size(BIC,1);
 selr(deselr) = [];
 BIC = BIC(selr,:); 
 
-save('Results\model_fit_conf2.mat', 'BIC', 'coeffs', 'conft', 'RMSE','modelconf','regFitted','regFittedCond','Qgood','Qbad','Vgood','Vbad')
+save('Results\model_fit_conf2.mat', 'BIC', 'coeffs', 'conft', 'RMSE','modelconf','regFitted','regFittedCond')
 
 %% model comparison between ALL models
 [postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2)

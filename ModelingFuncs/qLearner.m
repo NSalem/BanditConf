@@ -11,8 +11,8 @@ classdef    qLearner < handle
         sigma = 0;
         T
         drift = false;
-        Q = [0,0];
-        V = [0,0];
+        Q = [50,50];
+        V = [10,10];
         r = [];
     end
 
@@ -55,10 +55,8 @@ classdef    qLearner < handle
 
             %% update var
             if isprop(obj,'lrv') && ~isempty(obj.lrv) 
-                if obj.Q(a)~=0
-                    deltaV = ((r - obj.Q(a))^2 -obj.V(a)); 
-                    obj.V(a) = obj.V(a) + obj.lrv.*deltaV.*double(delta>0) + obj.lrv2.*deltaV.*double(delta<0);
-                end
+                deltaV = ((r - obj.Q(a))^2 -obj.V(a)); 
+                obj.V(a) = obj.V(a) + obj.lrv.*deltaV.*double(delta>0) + obj.lrv2.*deltaV.*double(delta<0);
             end
             %% udapte mean 
             obj.Q(a) = obj.Q(a) + obj.lrm.*delta.*double(delta>0) + obj.lrm2.*delta.*double(delta<0);                                     % the delta rule for the factual choice             

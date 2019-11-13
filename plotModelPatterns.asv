@@ -4,7 +4,7 @@
 load('Results\model_fits_patterns.mat')
 load('Results\model_fit_conf2.mat')
 
-trlsel = [10:25];
+trlsel = [1:25];
 %% plot avg accuracy per condition
 %     modelmarkers = {'^','^','d','d','d','o','o','o'}
     mcorrcon = squeeze(mean(corr_cond(:,:,:,trlsel),4));
@@ -12,7 +12,7 @@ trlsel = [10:25];
     mcorrconmean = mean(mcorrcon,2);
     mcorrconse = squeeze(std(mcorrcon,[],2))/sqrt(size(mcorrcon,2));
     
-    mmodelpccon = mean(model_pc_cond(:,:,:,:,trlsel),5);
+    mmodelpccon = mean(model_pc_cond(:,:,:,:,1:25),5);
     mmodelpccon = reshape(mmodelpccon,whichmodels(end),4,size(mmodelpccon,4));
     modelmean = squeeze(mean(mmodelpccon,3));
     modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
@@ -24,7 +24,7 @@ trlsel = [10:25];
     % plot(mcorrcon,'Color',[.8,.8,.8]);
     plot([0,5],[.5,.5],':k')
     for imodel = whichmodels
-        subplot(2,5,imodel)
+        subplot(2,4,imodel)
             hold on
             title(modellabels(imodel));
             errorbar(mcorrconmean(4:-1:1),mcorrconse(4:-1:1),['ko'],'MarkerFaceColor', [.5,.5,.5])
@@ -52,7 +52,7 @@ trlsel = [10:25];
 %     modelconf = model_pc_cond;
 %     modelconf(modelconf<.5) = .5;
 %     modelconf2 = (modelconf-1)./10+.5;
-    modelconf = squeeze(mean(modelconf(:,:,:,:,trlsel),5));
+    modelconf = squeeze(mean(modelconf(:,:,:,:,1:25),5));
     modelconf = reshape(modelconf,size(modelconf,1),whichmodels(end),4);
 %     modelconf = (modelconf-.5)*10+1
     modelmeanconf = squeeze(mean(modelconf,1));
@@ -66,7 +66,7 @@ trlsel = [10:25];
     figure()
     plotfilename = 'resim_confidence_cond'
     for imodel = whichmodels
-        subplot(2,5,imodel)
+        subplot(2,4,imodel)
             hold on
             title(modellabels(imodel));
             errorbar(mconfconmean(4:-1:1),mconfconse(4:-1:1),'ko','MarkerFaceColor', [.5,.5,.5])

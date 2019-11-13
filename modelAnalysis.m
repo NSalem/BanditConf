@@ -7,7 +7,7 @@ function modelAnalysis(filename,whichmodels)
         doSave = 1;
     end
     if nargin<1 || isempty(filename)
-        filename = 'Results\model_fitsMAP_exp1.mat';
+        filename = 'Results\model_fitsMAP_exp1V0_100';
     end
     
     load(filename);
@@ -27,7 +27,7 @@ Choices(Choices==3) = 2;
 
 nmodels = numel(whichmodels);
 
-allabels= {'Q1','Q2','Q1V1','Q2V1','Q1V2','Q1V1-T','Q2V1-T','Q1V2-T'}
+allabels= {'Q1','Q2','Q1V1','Q2V1','Q1V2','Q2V2','Q1V1-T','Q2V1-T','Q1V2-T','Q2V2-T'}
 modellabels = {allabels{whichmodels}};
 %% get model accuracy and conf per condition
 for imodel  = 1:numel(parameters)

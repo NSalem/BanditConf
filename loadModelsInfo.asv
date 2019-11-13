@@ -68,5 +68,5 @@ for imodel = 1:numel(modelsinfo)
         modelsinfo{imodel}.priorfuncs.(thisParamName) = priorfuncs.(thisParamName);
     end
      modelsinfo{imodel}.Q = [50,50];
-     modelsinfo{imodel}.V = [10,10];
+     modelsinfo{imodel}.V = [3000,3000];
 end

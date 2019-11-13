@@ -39,4 +39,4 @@ for imodel = whichmodels;
     clear paramsPerSub;
 end
 
-save('Results\model_fitsMAP_exp1','parameters','LPP', 'modelsinfo','bic', 'aic','ll','LAME')
+save('Results\model_fitsMAP_exp1V0_10','parameters','LPP', 'modelsinfo','bic', 'aic','ll','LAME')

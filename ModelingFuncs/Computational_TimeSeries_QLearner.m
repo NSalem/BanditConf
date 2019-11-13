@@ -21,7 +21,7 @@ for i = 1:length(a)
         if dum_action == a(i)
             conf(i) = trl_conf;
         else
-            conf(i) = trl_confUnchosen;
+            conf(i) = trl_confUnchosen;%1-trl_conf;
         end
         %%% learn
         l.learn(a(i),r(i));

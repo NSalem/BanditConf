@@ -213,7 +213,8 @@ saveas(gcf,['Plots\',plotfilename,modelsStr,'.png'])
 mconfcon = squeeze(mean(conf_cond,4));
 mconfcon = reshape(mconfcon,4,65);
 
-mmodelconfcond = mean(modelconf,5);
+% mmodelconfcond = mean(modelconf,5);
+mmodelconfcond = mean(regFitted,5);
 mmodelconfcond = reshape(mmodelconfcond,whichmodels(end),4,65);
 
 modelmean = squeeze(mean(mmodelconfcond,3));

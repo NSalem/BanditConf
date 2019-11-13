@@ -8,6 +8,7 @@ classdef    qLearner < handle
         lrm2
         lrv2
         lambda = 0;
+        sigma = 0;
         T
         drift = false;
         Q = [0,0];
@@ -95,6 +96,7 @@ classdef    qLearner < handle
 
                 pQ2 = sum(Q2>Q1)/numel(Q1); %probability of choosing action 2 is equal to the proportion of sampled  
                                             %values of Q2 that are higher than sampled values from Q1
+                                            
                 if (obj.V(1)== 0 || obj.V(2) ==0);
                     pQ2 = .5;
                 elseif pQ2 == 1
@@ -103,20 +105,27 @@ classdef    qLearner < handle
                     pQ2 = 1/1000;
                 end
                 action = double(rand<pQ2)+1; %action, 1 or 2
+                dQ = obj.Q(2)-obj.Q(1);
+                Ex = dQ;
+                confNoise =  sqrt(obj.V(1))+sqrt(obj.V(2))+obj.sigma;
                 if action == 2
                     p = pQ2;
-                    d = obj.Q(2)-obj.Q(1);
+%                     d =dQ;
 %                     conf = obj.Q(2);confUnchosen = obj.Q(1);
+                    conf = (normpdf(Ex,abs(dQ),confNoise))/((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)));
+                    confUnchosen = (normpdf(Ex,-abs(dQ),confNoise))/((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)));
+
                 else
                     p = 1-pQ2;
-                    d = obj.Q(1)-obj.Q(2);
+%                     d = dQ;
 %                     conf = obj.Q(1); confUnchosen = obj.Q(2);
+                    conf = (normpdf(Ex,-abs(dQ),confNoise))/((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)));
+                    confUnchosen = (normpdf(Ex,abs(dQ),confNoise))/((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)));
                 end
 %                 conf = p;
 %                 confUnchosen = 1-p;
-           noise =  sqrt(obj.V(1))+sqrt(obj.V(2));
-           conf = (normpdf(d,d,noise))/((normpdf(d,d,noise))+(normpdf(d,-d,noise)));
-           confUnchosen = (normpdf(d,-d,noise))/((normpdf(d,d,noise))+(normpdf(d,-d,noise)));
+%            conf = (normpdf(Ex,d,noise))/((normpdf(Ex,d,noise))+(normpdf(Ex,-d,noise)));
+%            confUnchosen = (normpdf(Ex,-d,noise))/((normpdf(Ex,d,noise))+(normpdf(Ex,-d,noise)));
 
         end
         
@@ -129,21 +138,26 @@ classdef    qLearner < handle
            Q1 = obj.Q(1);
            
            dQ = (Q2 - Q1)./100; %divided by 100 to keep dQ between 0 and 1
-           
+           Ex = dQ;
            pc = 1./(1+exp(-dQ.*obj.beta));
            action = double(rand<pc) + 1;
         
            if action == 2
                 p = pc;
 %                 conf = Q2; confUnchosen = Q1;
-                d = dQ;
+%                 d = dQ;
+               conf = (normpdf(dQ,abs(dQ),1./obj.beta*1.6))/((normpdf(dQ,abs(dQ),1./obj.beta*1.6))+(normpdf(dQ,-abs(dQ),1./obj.beta*1.6)));
+               confUnchosen = (normpdf(dQ,-abs(dQ),1./obj.beta*1.6))/((normpdf(dQ,abs(dQ),1./obj.beta*1.6))+(normpdf(dQ,-abs(dQ),1./obj.beta*1.6)));
             else
                 p = 1-pc;
 %                 conf = Q1; confUnchosen = Q2;
-                d = -dQ;
+%                 d = -dQ;
+               conf = (normpdf(dQ,-abs(dQ),1./obj.beta*1.6))/((normpdf(dQ,abs(dQ),1./obj.beta*1.6))+(normpdf(dQ,-abs(dQ),1./obj.beta*1.6)));
+               confUnchosen = (normpdf(dQ,abs(dQ),1./obj.beta*1.6))/((normpdf(dQ,abs(dQ),1./obj.beta*1.6))+(normpdf(dQ,-abs(dQ),1./obj.beta*1.6)));
+
            end
-           conf = (normpdf(d,d,1./obj.beta*1.6))/((normpdf(d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
-           confUnchosen = (normpdf(d,-d,1./obj.beta*1.6))/((normpdf(d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
+%            conf = (normpdf(d,d,1./obj.beta*1.6))/((normpdf(d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
+%            confUnchosen = (normpdf(d,-d,1./obj.beta*1.6))/((normpdf(Ex,d,1./obj.beta*1.6))+(normpdf(Ex,-d,1./obj.beta*1.6)));
         end
         
         function [action,p,conf,confUnchosen] = chooseActionThresholdSigmoid(obj)
@@ -162,6 +176,7 @@ classdef    qLearner < handle
            SP1 = 1-normcdf(obj.T,Q1,sqrt(V1));
            
            dQ = (abs(SP2)-abs(SP1));
+           Ex = dQ;
            if isnan(dQ)
                dQ = 0;
            end
@@ -171,14 +186,19 @@ classdef    qLearner < handle
            if action == 2
                 p = pc;
                 conf = SP2;confUnchosen = SP1;
-                d = dQ;
+%                 d = dQ;
+               conf = (normpdf(dQ,abs(dQ),1./obj.beta*1.6))/((normpdf(dQ,abs(dQ),1./obj.beta*1.6))+(normpdf(dQ,-abs(dQ),1./obj.beta*1.6)));
+               confUnchosen = (normpdf(dQ,-abs(dQ),1./obj.beta*1.6))/((normpdf(dQ,abs(dQ),1./obj.beta*1.6))+(normpdf(dQ,-abs(dQ),1./obj.beta*1.6)));
            else
                 p = 1-pc;
                 conf = SP1;confUnchosen = SP2;
-                d = -dQ;
+%                 d = -dQ;
+%                conf = (normpdf(dQ,-abs(dQ),1./obj.beta*1.6))/((normpdf(dQ,abs(dQ),1./obj.beta*1.6))+(normpdf(dQ,-abs(dQ),1./obj.beta*1.6)));
+%                confUnchosen = (normpdf(dQ,abs(dQ),1./obj.beta*1.6))/((normpdf(dQ,abs(dQ),1./obj.beta*1.6))+(normpdf(dQ,-abs(dQ),1./obj.beta*1.6)));
+
            end
-           conf = (normpdf(d,d,1./obj.beta*1.6))/((normpdf(d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
-           confUnchosen = (normpdf(d,-d,1./obj.beta*1.6))/((normpdf(-d,d,1./obj.beta*1.6))+(normpdf(d,-d,1./obj.beta*1.6)));
+%            conf = (normpdf(Ex,d,1./obj.beta*1.6))/((normpdf(Ex,d,1./obj.beta*1.6))+(normpdf(Ex,-d,1./obj.beta*1.6)));
+%            confUnchosen = (normpdf(Ex,-d,1./obj.beta*1.6))/((normpdf(Ex,d,1./obj.beta*1.6))+(normpdf(Ex,-d,1./obj.beta*1.6)));
         end
 
     end

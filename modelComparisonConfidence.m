@@ -101,8 +101,11 @@ for ivb = 1:numel(vars)
                     BIC(isub, imodel) =   regThisSub.ModelCriterion.BIC;
                     coeffs(isub,imodel,:) = regThisSub.Coefficients.Estimate;
                     conft(isub,imodel,:) = regThisSub.Coefficients.tStat;
-
+                    regFitted(isub,imodel,:) = regThisSub.Fitted;
+                    regCond = reshape(regThisSub.Fitted,[2,2,25]);
                     RMSE(isub,imodel,:) = regThisSub.RMSE;
+                    regFittedCond(isub,imodel,:,:,:) = regCond;
+
                 end
             end
         end
@@ -117,7 +120,7 @@ selr = 1:size(BIC,1);
 selr(deselr) = [];
 BIC = BIC(selr,:); 
 
-save('Results\model_fit_conf2.mat', 'BIC', 'coeffs', 'conft', 'RMSE','modelconf')
+save('Results\model_fit_conf2.mat', 'BIC', 'coeffs', 'conft', 'RMSE','modelconf','regFitted','regFittedCond')
 
 %% model comparison between ALL models
 [postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2)

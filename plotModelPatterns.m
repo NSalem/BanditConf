@@ -2,7 +2,7 @@
 %  load('Results\model_sims_subjparams.mat')
  
 load('Results\model_fits_patterns.mat')
-
+load('Results\model_fit_conf2.mat')
 
 trlsel = [1:25];
 %% plot avg accuracy per condition
@@ -12,7 +12,7 @@ trlsel = [1:25];
     mcorrconmean = mean(mcorrcon,2);
     mcorrconse = squeeze(std(mcorrcon,[],2))/sqrt(size(mcorrcon,2));
     
-    mmodelpccon = mean(model_pc_cond(:,:,:,:,10:25),5);
+    mmodelpccon = mean(model_pc_cond(:,:,:,:,1:25),5);
     mmodelpccon = reshape(mmodelpccon,whichmodels(end),4,size(mmodelpccon,4));
     modelmean = squeeze(mean(mmodelpccon,3));
     modelse = squeeze(std(mmodelpccon,[],3))/sqrt(size(mmodelpccon,3));
@@ -27,12 +27,14 @@ trlsel = [1:25];
         subplot(2,4,imodel)
             hold on
             title(modellabels(imodel));
-            errorbar(mcorrconmean,mcorrconse,['ko'],'MarkerFaceColor', [.5,.5,.5])
-            errorbar(modelmean(imodel,:),modelse(imodel,:),'ko','MarkerFaceColor', modelcolors(imodel,:))
+            errorbar(mcorrconmean(4:-1:1),mcorrconse(4:-1:1),['ko'],'MarkerFaceColor', [.5,.5,.5])
+            errorbar(modelmean(imodel,4:-1:1),modelse(imodel,4:-1:1),'ko','MarkerFaceColor', modelcolors(imodel,:))
             ylabel('Accuracy')
             xlim([0,5])
             xticks([1:4]);
-            xticklabels({'vLvL','vHvL','vLvH','vHvH'})
+%             xticklabels({'vLvL','vHvL','vLvH','vHvH'})
+            xticklabels({'vHvH','vLvH','vHvL','vLvL'})
+
     end
 %     legend(y(whichmodels),modellabels, 'Location', 'southeastoutside')
     % hold on
@@ -46,13 +48,14 @@ trlsel = [1:25];
     mconfconmean = mean(mconfcon,2);
     mconfconse = squeeze(std(mconfcon,[],2))/sqrt(size(mconfcon,2));
     
-    modelconf = model_pc_cond;
+    modelconf = regFittedCond;
+%     modelconf = model_pc_cond;
 %     modelconf(modelconf<.5) = .5;
-    modelconf = mean(modelconf,5);
-    modelconf = reshape(modelconf,whichmodels(end),4,size(modelconf,4));
-    modelconf = (modelconf-.5)*10+1
-    modelmeanconf = squeeze(mean(modelconf,3));
-    modelseconf = squeeze(std(modelconf,[],3))/sqrt(size(modelconf,3));
+    modelconf = squeeze(mean(modelconf(:,:,:,:,1:25),5));
+    modelconf = reshape(modelconf,size(modelconf,1),whichmodels(end),4);
+%     modelconf = (modelconf-.5)*10+1
+    modelmeanconf = squeeze(mean(modelconf,1));
+    modelseconf = squeeze(std(modelconf,[],1))/sqrt(size(modelconf,1));
 
     % std(pcmean,[]/4)/sqrt(size;
 
@@ -65,12 +68,12 @@ trlsel = [1:25];
         subplot(2,4,imodel)
             hold on
             title(modellabels(imodel));
-            errorbar(mconfconmean,mconfconse,'ko','MarkerFaceColor', [.5,.5,.5])
-            errorbar((modelmeanconf(imodel,:)),modelseconf(imodel,:),'ko','MarkerFaceColor', modelcolors(imodel,:))
+            errorbar(mconfconmean(4:-1:1),mconfconse(4:-1:1),'ko','MarkerFaceColor', [.5,.5,.5])
+            errorbar((modelmeanconf(imodel,4:-1:1)),modelseconf(imodel,4:-1:1),'ko','MarkerFaceColor', modelcolors(imodel,:))
             ylabel('Confidence')
         xlim([0,5])
         xticks([1:4]);
-        xticklabels({'vLvL','vHvL','vLvH','vHvH'})
+        xticklabels({'vHvH','vLvH','vHvL','vLvL'})
     end
 %     saveas(gcf,['Plots\',plotfilename,modelsStr,'.png'])
 

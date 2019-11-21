@@ -1,6 +1,6 @@
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-load('Results\model_fitsMAP_exp1V0_3000.mat');
+load('Results\model_fitsMAP_exp1V0_10.mat');
 
 loadExp1;
 ChoicesOrig = Choices;
@@ -150,6 +150,40 @@ ylabel('model frequencies')
 plot([0,9],[1/8,1/8],'k:')
 set(gca,'FontSize', 14)
 
-% %% model comparison between families ([1 2] vs [3 4 5] vs [6 7 8])
-% options.families = {[1,2],[3:5],[6:8]};
-% [postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2,options)
+%% learning variance vs not
+options.families = {[1,2],[3:10]};
+[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2,options) %% variance wins;
+
+%% Q vs Fleming vs SSAT
+options.families = {[1,2],[3:6],[7:10]};
+[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2,options) %% variance wins;
+
+%% fleming vs SSAT
+options.families = {[1:4],[5:8]};
+[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC(:,3:10)'/2,options) %% fleming almost wins (ep = .94);
+
+%% fleming biased vs not
+options.families = {[1],[2:4]}
+[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC(:,3:6)'/2,options); %biased (ep = .99)
+
+%%within fleming biased
+[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC(:,4:6)'/2); %biased (ep = .99) %undetermined
+
+
+
+
+figure()
+errorbar([1:size(BIC,2)],nanmean(BIC),nanstd(BIC)./(sqrt(size(BIC,1))))
+xticklabels(modellabels)
+ylabel('Model evidence (BIC)')
+xtickangle(45)
+
+
+%% unbiased vs optimistic learning
+options.families = {[1,3,7],[2,4:6,8:10]}
+[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC(:,:)'/2,options) %% optimistic (ep = 1);
+
+%% optimistic mean, sd, both?
+dum = BIC(:,[2,4:6,8:10]); 
+options.families = {[1,2,5],[3,6],[4,7]}
+[postBMCconf,outBMCconf] = VBA_groupBMC(-dum(:,:)'/2,options) %% mean (ep = .81), undetermined

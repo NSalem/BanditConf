@@ -2,8 +2,8 @@ load('Results\model_fit_conf2.mat');
 figure()
 ip = 0;
 vars = [10,25];
-nmodel = 6;
-trlsel = 25;
+nmodel = 5;
+trlsel = 20:25;
 for ivb =1:2
     for ivg = 1:2
        ip = ip+1; 
@@ -26,7 +26,9 @@ for ivb =1:2
        xlim([-50,150])
        dPrime = (muGood-muBad)./sqrt((sigmaBad^2+sigmaGood^2)./2);
        dPrimeReal = (muRealGood-muRealBad)./sqrt((sigmaRealBad^2+sigmaRealGood^2)./2);
-       
+       ylim([0,.1])
+       xlabel('$\hat{p}(R)$','Interpreter','latex')
+       set(gca,'FontSize',12)
        text(0 ,0.90,[sprintf('d'' = %0.2f  ',dPrime),sprintf('d''_{Theoretic} = %0.2f',dPrimeReal)],'Units','normalized')
     end
 end

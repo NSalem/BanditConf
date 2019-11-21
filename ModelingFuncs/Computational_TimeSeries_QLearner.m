@@ -4,7 +4,7 @@ l = qLearner(params);
 ntrials = length(a);
 
 Q       = zeros(2,ntrials);        % Initial (subjective) mean
-V       = zeros(2,ntrials);        % Initial (subjective) variance
+V       = NaN(2,ntrials);        % Initial (subjective) variance
 pc2      = ones(1,ntrials)*.5;
 p    = ones(1,ntrials).*5;
 conf    = ones(1,ntrials).*5;
@@ -32,6 +32,7 @@ for i = 1:length(a)
         Q(a(i),i) = l.Q(a(i));
         Q(3-a(i),i) = l.Q(3-a(i));
         V(a(i),i) = l.V(a(i));
+        V(3-a(i),i) = l.V(3-a(i));
 
     else
         Q(1,i) = Q(1,i);

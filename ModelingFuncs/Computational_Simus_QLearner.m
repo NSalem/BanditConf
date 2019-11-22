@@ -1,4 +1,4 @@
-function [Q,V,pc,a,r] = SimulateQLearner(params,OUT)
+function [Q,V,pc,a,r,zhat] = SimulateQLearner(params,OUT)
 
 l = qLearner(params);
 %% Hidden variables
@@ -8,11 +8,12 @@ Q       = zeros(2,ntrials);        % Initial (subjective) mean
 V       = zeros(2,ntrials);        % Initial (subjective) variance 
 a       = NaN(ntrials,1);
 r       = NaN(ntrials,1);
+zhat    = NaN(ntrials,1);
 
 %%%% loop through trials %%%%
 for itrial = 1:length(a)
     %%% choose action
-    [a(itrial),this_pc]=l.chooseAction();  
+    [a(itrial),this_pc,~,~,zhat(itrial)]=l.chooseAction();  
     if a(itrial)~=2 
         this_pc = 1-this_pc; %pc is probability of choosing option 2
     end

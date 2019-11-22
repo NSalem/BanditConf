@@ -232,7 +232,7 @@ classdef    qLearner < handle
                 confp = sum(confdist>confRating-confMargin & confdist<confRating+confMargin)./numel(confdist);
             end
             if confp ==0
-                confp = 1./100000;
+                confP = 1./100000;
             end
         end
 

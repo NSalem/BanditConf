@@ -1,3 +1,6 @@
+% outfilename = 'model_fitsMAPNew_exp1';
+outfilename = 'model_fitsMAP_exp1FLEMBIASED2';
+
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
 
@@ -6,8 +9,8 @@ loadExp1;
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
 
-loadModelsInfo; 
-
+% loadModelsInfoNew; 
+loadModelsInfoFlemingBiased;
 ntrials = size(Choices,1);
 
 whichmodels = 1:numel(modelsinfo);
@@ -39,4 +42,4 @@ for imodel = whichmodels;
     clear paramsPerSub;
 end
 
-save('Results\model_fitsMAP_exp1V0_10','parameters','LPP', 'modelsinfo','bic', 'aic','ll','LAME')
+save(['Results\',outfilename],'parameters','LPP', 'modelsinfo','bic', 'aic','ll','LAME')

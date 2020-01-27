@@ -8,7 +8,7 @@ clear
 close all
 addpath('ModelingFuncs\');
 addpath('helperfuncs\')
-outfilename = 'model_simulations_results_exp1.mat';
+outfilename = 'model_simulations_results_exp1NEW.mat';
 loadExp1; %load experiment 1 to use the same probability distributions for outcomes
 
 nsims      = 50;
@@ -18,7 +18,7 @@ estimateLPP = 1;
 estimateML = 0;
 
 
- loadModelsInfo;
+ loadModelsInfoNew;
  nmodels = numel(modelsinfo);
 
 %% establish distribution of generative parameters

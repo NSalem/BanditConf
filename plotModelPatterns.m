@@ -2,7 +2,7 @@
 %  load('Results\model_sims_subjparams.mat')
  
 load('Results\model_fits_patterns.mat')
-load('Results\model_fit_conf2.mat')
+load('Results\model_fit_conf3.mat')
 
 trlsel = [10:25];
 %% plot avg accuracy per condition

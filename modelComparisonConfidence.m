@@ -1,6 +1,8 @@
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-load('Results\model_fitsMAP_exp1V0_10.mat');
+% load('Results\model_fitsMAP_exp1V0_10.mat');
+load('Results\model_fitsMAPNew_exp1.mat');
+% load('Results\model_fitsMAP_exp1FLEMBIASED2.mat');
 
 loadExp1;
 ChoicesOrig = Choices;
@@ -14,7 +16,7 @@ allabels= {'Q1','Q2','Q1V1','Q2V1','Q1V2','Q2V2','Q1V1-T','Q2V1-T','Q1V2-T','Q2V
 modellabels = {allabels{whichmodels}};
 
 %% get model variables (probability of choosing 2) per condition
-for imodel  = 1:numel(parameters)
+for imodel  = whichmodels
     for isub = 1:size(Choices,2)
         paramstruct = modelsinfo{imodel};
             for iparam = 1:numel(modelsinfo{imodel}.paramnames)
@@ -136,7 +138,7 @@ selr = 1:size(BIC,1);
 selr(deselr) = [];
 BIC = BIC(selr,:); 
 
-save('Results\model_fit_conf2.mat', 'BIC', 'coeffs', 'conft', 'RMSE','modelconf','regFitted','regFittedCond','Qgood','Qbad','Vgood','Vbad')
+save('Results\model_fit_conf3.mat', 'BIC', 'coeffs', 'conft', 'RMSE','modelconf','regFitted','regFittedCond','Qgood','Qbad','Vgood','Vbad')
 
 %% model comparison between ALL models
 [postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2)

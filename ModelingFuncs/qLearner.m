@@ -9,6 +9,8 @@ classdef    qLearner < handle
         lrv2
         lambda = 0;
         sigma = 0;
+        choiceRule = 'Thompson';
+        wFlemConf = 1;
         T
         drift = false;
         Q = [50,50];
@@ -72,11 +74,11 @@ classdef    qLearner < handle
         
 
         function [action,p,Econf,EconfUnchosen,conf] = chooseAction(obj) 
-            if isprop(obj,'T') && ~isempty(obj.T) 
+            if strcmp(obj.choiceRule,'SAT')%isprop(obj,'T') && ~isempty(obj.T) 
                 [action,p,Econf,EconfUnchosen] = chooseActionThresholdSigmoid(obj);
-            elseif isprop(obj,'lrv') && ~isempty(obj.lrv) 
+            elseif strcmp(obj.choiceRule,'Thompson')%isprop(obj,'lrv') && ~isempty(obj.lrv) 
                 [action,p,Econf,EconfUnchosen,conf] = chooseActionThompson(obj);
-            elseif isprop(obj,'beta') && ~isempty(obj.beta)
+            elseif strcmp(obj.choiceRule,'Sigmoid')%isprop(obj,'beta') && ~isempty(obj.beta)
                 [action,p,Econf,EconfUnchosen]  = chooseActionSigmoid(obj); 
 %             elseif isprop(obj,'sigma') && ~isempty(obj.sigma)
 %                 [action,p,conf,confUnchosen]  = chooseActionFleming(obj);
@@ -92,38 +94,45 @@ classdef    qLearner < handle
                     %action: (1 or 2)
                     %p: Probability of having chosen action based on the state
 
-                Q1 = randn(100000, 1,1)*sqrt(obj.V(1))+obj.Q(1); %sampled values from current prior distribution of option1
-                Q2 = randn(100000, 1,1)*sqrt(obj.V(2))+obj.Q(2); %sampled values from current prior distribution of option2
-                Qdiff = Q2-Q1;
-                pQ2 = sum(Q2>Q1)/numel(Q1); %probability of choosing action 2 is equal to the proportion of sampled  
+%                 Q1 = randn(100000, 1,1)*sqrt(obj.V(1))+obj.Q(1); %sampled values from current prior distribution of option1
+%                 Q2 = randn(100000, 1,1)*sqrt(obj.V(2))+obj.Q(2); %sampled values from current prior distribution of option2
+%                 Qdiff = Q2-Q1;
+%                 pQ2 = sum(Q2>Q1)/numel(Q1); %probability of choosing action 2 is equal to the proportion of sampled  
                                             %values of Q2 that are higher than sampled values from Q1
-                                            
-                if (obj.V(1)== 0 || obj.V(2) ==0);
-                    pQ2 = .5;
-                elseif pQ2 == 1
-                    pQ2 = 1-1/1000;
-                elseif pQ2 ==0
-                    pQ2 = 1/1000;
-                end
-                X = (randn*sqrt(obj.V(1))+obj.Q(1))-(randn*sqrt(obj.V(1))+obj.Q(1))+randn.*1./obj.beta;
+                 
+                muDiff = obj.Q(2)-obj.Q(1);
+                sigmaDiff =  sqrt(obj.V(1)+obj.V(2)+(1./obj.beta)^2);
+                confNoise =  sigmaDiff;
+                
+                pQ2 = 1-normcdf(0,muDiff,sigmaDiff);
+%                 if (obj.V(1)== 0 || obj.V(2) ==0);
+%                     pQ2 = .5;
+%                 elseif pQ2 == 1
+%                     pQ2 = 1-1/1000;
+%                 elseif pQ2 ==0
+%                     pQ2 = 1/1000;
+%                 end
+%                 X = (randn*sqrt(obj.V(2))+obj.Q(2))-(randn*sqrt(obj.V(1))+obj.Q(1))+randn.*1./obj.beta;
+                
+                X = randn*sigmaDiff+muDiff;
+
                 action = double(X>=0)+1; %action, 1 or 2
                 dQ = obj.Q(2)-obj.Q(1);
                 Ex = dQ;
-                confNoise =  sqrt(obj.V(1)+obj.V(2)+(1./obj.beta)^2);
                 if action == 2
                     p = pQ2;
 %                     d =dQ;
 %                     conf = obj.Q(2);confUnchosen = obj.Q(1);
-                    Econf = (normpdf(Ex,abs(dQ),confNoise))/((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)));
-                    EconfUnchosen = (normpdf(Ex,-abs(dQ),confNoise))/((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)));
-                    conf = (normpdf(X,abs(dQ),confNoise))/((normpdf(X,abs(dQ),confNoise))+(normpdf(X,-abs(dQ),confNoise)));
+                    Econf = (normpdf(Ex,abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
+                    EconfUnchosen = (normpdf(Ex,-abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
+                    conf = (normpdf(X,abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(X,abs(dQ),confNoise))+(normpdf(X,-abs(dQ),confNoise)))+1-obj.wFlemConf);
                 else
                     p = 1-pQ2;
 %                     d = dQ;
 %                     conf = obj.Q(1); confUnchosen = obj.Q(2);
-                    Econf = (normpdf(Ex,-abs(dQ),confNoise))/((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)));
-                    EconfUnchosen = (normpdf(Ex,abs(dQ),confNoise))/((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)));
-                    conf = (normpdf(X,abs(-dQ),confNoise))/((normpdf(X,abs(dQ),confNoise))+(normpdf(X,-abs(dQ),confNoise)));
+                    Econf = (normpdf(Ex,-abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
+                    EconfUnchosen = (normpdf(Ex,abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
+                    conf = (normpdf(X,abs(-dQ),confNoise))./(obj.wFlemConf.*((normpdf(X,abs(dQ),confNoise))+(normpdf(X,-abs(dQ),confNoise)))+1-obj.wFlemConf);
                 end
 %                 conf = p;
 %                 confUnchosen = 1-p;
@@ -218,12 +227,13 @@ classdef    qLearner < handle
                 SP1 = 1-normcdf(obj.T,Q1,sqrt(V1));
                 
             else
-                Q1 = randn(100000, 1,1)*sqrt(obj.V(1))+obj.Q(1); %sampled values from current prior distribution of option1
-                Q2 = randn(100000, 1,1)*sqrt(obj.V(2))+obj.Q(2); %sampled values from current prior distribution of option2
-                Qdiff = Q2-Q1;
+%                 Q1 = randn(100000, 1,1)*sqrt(obj.V(1))+obj.Q(1); %sampled values from current prior distribution of option1
+%                 Q2 = randn(100000, 1,1)*sqrt(obj.V(2))+obj.Q(2); %sampled values from current prior distribution of option2
+%                 Qdiff = Q2-Q1;
                 confNoise =  sqrt(obj.V(1)+obj.V(2)+(1./obj.beta)^2);
-
-                dQ = mean(Q2-Q1); 
+%                 rng(1)
+                Qdiff = randn(100000, 1,1)*confNoise+(obj.Q(2)-obj.Q(1));
+                dQ = obj.Q(2)-obj.Q(1); 
                 if action ==2
                     confdist = (normpdf(Qdiff,abs(dQ),confNoise))./((normpdf(Qdiff,abs(dQ),confNoise))+(normpdf(Qdiff,-abs(dQ),confNoise)));
                 else

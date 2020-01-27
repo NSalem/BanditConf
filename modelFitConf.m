@@ -30,14 +30,14 @@ for imodel = whichmodels;
     lb = modelsinfo{imodel}.lb;
     ub = modelsinfo{imodel}.ub;
     x0 = modelsinfo{imodel}.x0;
-    parfor isub = 1:size(Choices,2)
+    for isub = 1:size(Choices,2)
         [theseParams,thisLPP,~,report(isub,imodel),~,gradient{isub,imodel},thisH]= ...
             fmincon(@(x) GetModelLLCONF_QLearner(x,modelsinfo{imodel},Choices(:,isub),confTransformed(:,isub),Reward(:,isub),1),x0,[],[],[],[],lb,ub,[],options);
         paramsPerSub(isub,:) = theseParams;
         nfpm = numel(modelsinfo{imodel}.paramnames);
         hessian{isub,imodel} = thisH;
         LPP(isub,imodel);
-        this_ll =  GetModelLL_QLearner(theseParams,modelsinfo{imodel},Choices(:,isub),Reward(:,isub),0);
+        this_ll =  GetModelLLCONF_QLearner(theseParams,modelsinfo{imodel},Choices(:,isub),confTransformed(:,isub),Reward(:,isub),1);
         ll(isub,imodel) = this_ll;
         bic(isub,imodel)=-2*-this_ll+nfpm*log(ntrials);
         aic(isub, imodel)=-2*-this_ll+nfpm; 

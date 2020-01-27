@@ -4,7 +4,7 @@ modelsinfo{1}.paramnames ={'beta','lrm'};
 modelsinfo{1}.lb = [0,0];
 modelsinfo{1}.ub = [Inf,1];
 modelsinfo{1}.x0 = [1,.5,];
-
+modelsinfo{1}.choic
 modelsinfo{2}.paramnames ={'beta','lrm','lrm2'};
 modelsinfo{2}.lb = [0,0,0];
 modelsinfo{2}.ub = [Inf,1,1];
@@ -30,28 +30,48 @@ modelsinfo{6}.lb = [0,0,0,0];
 modelsinfo{6}.ub = [1,1,1,1];
 modelsinfo{6}.x0 = [.5,.5,.5,.5];
 
-modelsinfo{7}.paramnames = {'lrm','lrv','T','beta'}
+modelsinfo{7}.paramnames = {'lrm','lrv','beta'}
 modelsinfo{7}.lb = [0,0,0,0];
 modelsinfo{7}.ub = [1,1,100,Inf];
 modelsinfo{7}.x0 = [.5,.5,50,1];
-modelsinfo{7}.drift = true;
 
-modelsinfo{8}.paramnames = {'lrm','lrm2','lrv','T','beta'}
+modelsinfo{8}.paramnames = {'lrm','lrm2','lrv','beta'}
 modelsinfo{8}.lb = [0,0,0,0,0];
 modelsinfo{8}.ub = [1,1,1,100,Inf];
 modelsinfo{8}.x0 = [.5,.5,.5,50,1];
-modelsinfo{8}.drift = true;
 
-modelsinfo{9}.paramnames = {'lrm','lrv','lrv2','T','beta'}
+modelsinfo{9}.paramnames = {'lrm','lrv','lrv2','beta'}
 modelsinfo{9}.lb = [0,0,0,0,0];
 modelsinfo{9}.ub = [1,1,1,100,Inf];
 modelsinfo{9}.x0 = [.5,.5,.5,50,1];
-modelsinfo{9}.drift = true;
 
-modelsinfo{10}.paramnames = {'lrm','lrm2','lrv','lrv2','T','beta'}
+modelsinfo{10}.paramnames = {'lrm','lrm2','lrv','lrv2','beta'}
 modelsinfo{10}.lb = [0,0,0,0,0,0];
 modelsinfo{10}.ub = [1,1,1,1,100,Inf];
 modelsinfo{10}.x0 = [.5,.5,.5,.5,50,1];
+
+modelsinfo{11}.paramnames = {'lrm','lrv','T','beta'}
+modelsinfo{11}.lb = [0,0,0,0];
+modelsinfo{11}.ub = [1,1,100,Inf];
+modelsinfo{11}.x0 = [.5,.5,50,1];
+modelsinfo{7}.drift = true;
+
+modelsinfo{12}.paramnames = {'lrm','lrm2','lrv','T','beta'}
+modelsinfo{12}.lb = [0,0,0,0,0];
+modelsinfo{12}.ub = [1,1,1,100,Inf];
+modelsinfo{12}.x0 = [.5,.5,.5,50,1];
+modelsinfo{8}.drift = true;
+
+modelsinfo{13}.paramnames = {'lrm','lrv','lrv2','T','beta'}
+modelsinfo{13}.lb = [0,0,0,0,0];
+modelsinfo{13}.ub = [1,1,1,100,Inf];
+modelsinfo{13}.x0 = [.5,.5,.5,50,1];
+modelsinfo{9}.drift = true;
+
+modelsinfo{14}.paramnames = {'lrm','lrm2','lrv','lrv2','T','beta'}
+modelsinfo{14}.lb = [0,0,0,0,0,0];
+modelsinfo{14}.ub = [1,1,1,1,100,Inf];
+modelsinfo{14}.x0 = [.5,.5,.5,.5,50,1];
 modelsinfo{10}.drift = true;
 
 priorfuncs.beta = '@(x) log(gampdf(x,1.2,5))';

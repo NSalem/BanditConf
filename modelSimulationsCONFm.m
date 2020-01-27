@@ -11,7 +11,7 @@ addpath('helperfuncs\')
 outfilename = 'model_simulationsConf_results_exp1.mat';
 loadExp1; %load experiment 1 to use the same probability distributions for outcomes
 
-nsims      = 50;
+nsims      = 1;
 nsub       = size(Choices,2);
 ntrials = size(Choices,1);
 estimateLPP = 1;
@@ -19,7 +19,7 @@ estimateML = 0;
 
 
  loadModelsInfoCONF;
- nmodels = numel(modelsinfo);
+ nmodels = 1%numel(modelsinfo);
 
 %% establish distribution of generative parameters
 
@@ -84,9 +84,17 @@ for isim = 1:nsims
 
                
                 %%% simulate choice and value %%%
-                [Q,V,pc,a,r] = Computational_Simus_QLearner(paramstructgen,OUT);
+                [Q,V,pc,a,r,zhat] = Computational_Simus_QLearner(paramstructgen,OUT);
                 dQ = squeeze(Q(2,:)-Q(1,:));
                 
+        conflevels = linspace(0,1,12);
+        zHatDiscrete = zhat;
+        confresps = conflevels(7:end);
+        for ie = 1:numel(zHatDiscrete) 
+            [~,idclosest] = min(abs(zHatDiscrete(ie)-confresps));
+            zHatDiscrete(ie) = confresps(idclosest);      
+        end
+        
                 for itrl = 1:ntrials
                     if isnan(a(itrl))
                         Q_c(itrl) = NaN;
@@ -99,7 +107,7 @@ for isim = 1:nsims
                 sigmaQ = Q_c+Q_uc;
 
                 
-            parfor irecmodel = 1:nmodels
+            for irecmodel = 1:nmodels
                 lb = modelsinfo{irecmodel}.lb;
                 ub = modelsinfo{irecmodel}.ub;
                 x0 = modelsinfo{irecmodel}.x0;
@@ -111,10 +119,10 @@ for isim = 1:nsims
                 
                 
                 if estimateLPP
-                    [parametersLPP{isim,isub,igenmodel,irecmodel},thisLPP,~,~,~,~,hessian]=fmincon(@(x) GetModelLLCONF_QLearner(x,modelsinfo{irecmodel},a,zhat,r,1),x0,[],[],[],[],lb,ub,[],options);
+                    [parametersLPP{isim,isub,igenmodel,irecmodel},thisLPP,~,~,~,~,hessian]=fmincon(@(x) GetModelLLCONF_QLearner(x,modelsinfo{irecmodel},a,zHatDiscrete,r,1),x0,[],[],[],[],lb,ub,[],options);
                     k = numel(modelsinfo{irecmodel}.paramnames);
                     LPP(isim,isub,igenmodel,irecmodel) = thisLPP;
-                    this_ll = GetModelLL_QLearner(parametersLPP{isim,isub,igenmodel,irecmodel},modelsinfo{irecmodel},a,r,0);
+                    this_ll = GetModelLLCONF_QLearner(parametersLPP{isim,isub,igenmodel,irecmodel},modelsinfo{irecmodel},a,zHatDiscrete,r,0);
                     bic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+k*log(ntrials);
                     aic(isim, isub,igenmodel,irecmodel)=-2*-this_ll+k; 
                     LAME(isim, isub,igenmodel,irecmodel) =  thisLPP - k/2*log(2*pi) + real(log(det(hessian))/2);%Laplace-approximated imodel evidence

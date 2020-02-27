@@ -1,7 +1,9 @@
 % load('Results\model_fitsMLE_exp1');
 % load('Results\model_fitsMAP_exp1V0_10.mat');
 
-load('Results\model_fitsMAPNew_exp1.mat');
+% load('Results\model_fitsMAPNew_exp1.mat');
+load('Results\model_fitsMAP_exp1_newmodels.mat');
+
 addpath('ModelingFuncs\')
 addpath('helperfuncs')
 % loadExp1;

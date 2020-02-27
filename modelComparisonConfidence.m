@@ -1,8 +1,9 @@
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
-% load('Results\model_fitsMAP_exp1V0_10.mat');
-load('Results\model_fitsMAPNew_exp1.mat');
-% load('Results\model_fitsMAP_exp1FLEMBIASED2.mat');
+load('Results\model_fitsMAP_exp1V0_10.mat');
+% load('Results\model_fitsMAPNew_exp1.mat');
+% load('Results\model_fitsMAP_exp1_newmodels.mat');
+% load('Results\model_fitsMAP_exp1FLEMBIASED3.mat');
 
 loadExp1;
 ChoicesOrig = Choices;

@@ -16,6 +16,7 @@ classdef    qLearner < handle
         Q = [50,50];
         V = [10,10];
         r = [];
+        QuWeightConf = 1;
     end
 
     methods 
@@ -101,7 +102,11 @@ classdef    qLearner < handle
                                             %values of Q2 that are higher than sampled values from Q1
                  
                 muDiff = obj.Q(2)-obj.Q(1);
-                sigmaDiff =  sqrt(obj.V(1)+obj.V(2)+(1./obj.beta)^2);
+                if isprop(obj,'beta') && ~isempty(obj.beta)
+                    sigmaDiff =  sqrt(obj.V(1)+obj.V(2)+(1./obj.beta)^2);
+                else
+                    sigmaDiff =  sqrt(obj.V(1)+obj.V(2));
+                end
                 confNoise =  sigmaDiff;
                 
                 pQ2 = 1-normcdf(0,muDiff,sigmaDiff);
@@ -119,21 +124,41 @@ classdef    qLearner < handle
                 action = double(X>=0)+1; %action, 1 or 2
                 dQ = obj.Q(2)-obj.Q(1);
                 Ex = dQ;
-                if action == 2
+                
+                ExNew = (obj.Q(action)-50)-(obj.QuWeightConf*(obj.Q(3-action)-50));
+                Econf = normpdf(ExNew,ExNew,confNoise)./...
+                    (normpdf(ExNew,ExNew,confNoise)+normpdf(ExNew,-ExNew,confNoise));   
+                conf = normpdf(X,ExNew,confNoise)./(normpdf(X,ExNew,confNoise)+normpdf(X,-ExNew,confNoise));
+
+                ExU = (obj.Q(3-action)-50)-(obj.QuWeightConf*(obj.Q(action)-50));
+
+                EconfUnchosen = normpdf(ExU,-ExU,confNoise)./...
+                    (normpdf(ExU,ExU,confNoise)+normpdf(ExU,-ExU,confNoise));   
+               if action ==2
                     p = pQ2;
-%                     d =dQ;
-%                     conf = obj.Q(2);confUnchosen = obj.Q(1);
-                    Econf = (normpdf(Ex,abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
-                    EconfUnchosen = (normpdf(Ex,-abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
-                    conf = (normpdf(X,abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(X,abs(dQ),confNoise))+(normpdf(X,-abs(dQ),confNoise)))+1-obj.wFlemConf);
-                else
+                elseif action ==1
                     p = 1-pQ2;
-%                     d = dQ;
-%                     conf = obj.Q(1); confUnchosen = obj.Q(2);
-                    Econf = (normpdf(Ex,-abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
-                    EconfUnchosen = (normpdf(Ex,abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
-                    conf = (normpdf(X,abs(-dQ),confNoise))./(obj.wFlemConf.*((normpdf(X,abs(dQ),confNoise))+(normpdf(X,-abs(dQ),confNoise)))+1-obj.wFlemConf);
-                end
+               else 
+                   p = [];
+               end
+%                 if action == 2
+%                     p = pQ2;
+% %                     d =dQ;
+% %                     conf = obj.Q(2);confUnchosen = obj.Q(1);
+%                     Econf = (normpdf(Ex,abs(dQ),confNoise))./(((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise))));
+%                     EconfUnchosen = (normpdf(Ex,-abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
+%                     conf = normpdf(X,abs(dQ),confNoise)./(normpdf(X,abs(dQ),confNoise)+normpdf(X,-abs(dQ),confNoise));
+%                 else
+%                     p = 1-pQ2;
+% %                     d = dQ;
+% %                     conf = obj.Q(1); confUnchosen = obj.Q(2);
+%                     Econf = (normpdf(Ex,-abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
+%                     EconfUnchosen = (normpdf(Ex,abs(dQ),confNoise))./(obj.wFlemConf.*((normpdf(Ex,abs(dQ),confNoise))+(normpdf(Ex,-abs(dQ),confNoise)))+1-obj.wFlemConf);
+%                     conf = normpdf(X,abs(-dQ),confNoise)./(normpdf(X,abs(dQ),confNoise)+normpdf(X,-abs(dQ),confNoise));
+%                 end
+
+
+
 %                 conf = p;
 %                 confUnchosen = 1-p;
 %            conf = (normpdf(Ex,d,noise))/((normpdf(Ex,d,noise))+(normpdf(Ex,-d,noise)));

@@ -2,7 +2,7 @@
 % load('Results\model_fitsMAP_exp1V0_10.mat');
 
 % load('Results\model_fitsMAPNew_exp1.mat');
-load('Results\model_fitsMAP_exp1_newmodels.mat');
+load('Results\model_fitsMAP_exp1_20200227.mat');
 
 addpath('ModelingFuncs\')
 addpath('helperfuncs')

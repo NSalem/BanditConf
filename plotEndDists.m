@@ -2,7 +2,7 @@ load('Results\model_fit_conf3.mat');
 figure()
 ip = 0;
 vars = [10,25];
-nmodel = 2;
+nmodel = 7;
 trlsel = 20:25;
 for ivb =1:2
     for ivg = 1:2

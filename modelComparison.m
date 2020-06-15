@@ -3,6 +3,11 @@
 
 % load('Results\model_fitsMAPNew_exp1.mat');
 load('Results\model_fitsMAP_exp1_20200227.mat');
+% load('Results\model_fitsMAP_exp1_nodrift.mat');
+
+extraMods = load('Results\model_fitsMAP_exp1_RC.mat');
+
+LAME_all = [LAME,extraMods.LAME]
 
 addpath('ModelingFuncs\')
 addpath('helperfuncs')
@@ -46,6 +51,9 @@ options.families = {[1,2],[3:10]}
 options.families = {[1,2],[3:6],[7:10]}
 [postBMC,outBMC]  = VBA_groupBMC(-LAME(:,:)'/2,options); %%% SSAT wins
 
+
+options.families = {[1,2],[3:6],[7:10],[11:13]}
+[postBMC,outBMC]  = VBA_groupBMC(-LAME_all(:,:)'/2,options); %%% SSAT wins
 
 %% SSAT unbiased vs biased learning
 options.families = {[1],[2:4]}

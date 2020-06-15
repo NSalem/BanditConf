@@ -7,7 +7,7 @@ function modelAnalysis(filename,whichmodels)
         doSave = 1;
     end
     if nargin<1 || isempty(filename)
-        filename = 'Results\model_fitsMAPNew_exp1.mat';
+        filename = 'Results\model_fitsMAP_exp1_20200227.mat';
     end
     
     load(filename);

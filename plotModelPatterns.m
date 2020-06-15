@@ -3,6 +3,8 @@
  
 load('Results\model_fits_patterns.mat')
 load('Results\model_fit_conf3.mat')
+% load('Results\model_fit_confRC.mat')
+
 
 trlsel = [10:25];
 %% plot avg accuracy per condition
@@ -33,7 +35,8 @@ trlsel = [10:25];
             xlim([0,5])
             xticks([1:4]);
 %             xticklabels({'vLvL','vHvL','vLvH','vHvH'})
-            xticklabels({'vHvH','vLvH','vHvL','vLvL'})
+            xticklabels({'HH','LH','HL','LL'})
+            xtickangle(45)
 
     end
 %     legend(y(whichmodels),modellabels, 'Location', 'southeastoutside')
@@ -74,7 +77,8 @@ trlsel = [10:25];
             ylabel('Confidence')
         xlim([0,5])
         xticks([1:4]);
-        xticklabels({'vHvH','vLvH','vHvL','vLvL'})
+        xticklabels({'HH','LH','HL','LL'})
+        xtickangle(45)
     end
 %     saveas(gcf,['Plots\',plotfilename,modelsStr,'.png'])
 

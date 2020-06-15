@@ -1,6 +1,11 @@
 % outfilename = 'model_fitsMAPNew_exp1';
 % outfilename = 'model_fitsMAP_exp1FLEMBIASED3';
-outfilename = 'model_fitsMAP_exp1_20200227';
+% outfilename = 'model_fitsMAP_exp1_20200227';
+
+% outfilename = 'model_fitsMAP_exp1_20200302';
+% outfilename = 'model_fitsMAP_exp1_RC';
+
+outfilename = 'model_fitsMAP_exp1_nodrift';
 
 addpath('ModelingFuncs\')
 addpath('helperfuncs');
@@ -10,7 +15,9 @@ loadExp1;
 Choices = Choices + 2;
 Choices(Choices==3) = 2;
 
-loadModelsInfo; 
+% loadModelsInfoRC; 
+loadModelsInfoNoDrift; 
+
 % loadModelsInfoFlemingBiased;
 ntrials = size(Choices,1);
 

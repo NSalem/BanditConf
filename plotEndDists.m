@@ -27,7 +27,7 @@ for ivb =1:2
        dPrime = (muGood-muBad)./sqrt((sigmaBad^2+sigmaGood^2)./2);
        dPrimeReal = (muRealGood-muRealBad)./sqrt((sigmaRealBad^2+sigmaRealGood^2)./2);
        ylim([0,.1])
-       xlabel('$\hat{p}(R)$','Interpreter','latex')
+       xlabel('R','Interpreter','latex')
        set(gca,'FontSize',12)
        text(0 ,0.90,[sprintf('d'' = %0.2f  ',dPrime),sprintf('d''_{Theoretic} = %0.2f',dPrimeReal)],'Units','normalized')
     end

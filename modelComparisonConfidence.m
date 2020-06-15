@@ -6,6 +6,10 @@ addpath('helperfuncs');
 % load('Results\model_fitsMAP_exp1FLEMBIASED3.mat');
 load('Results\model_fitsMAP_exp1_20200227.mat');
 
+% load('Results\model_fitsMAP_exp1_nodrift.mat');
+
+% 
+
 loadExp1;
 ChoicesOrig = Choices;
 Choices = Choices + 2;
@@ -67,7 +71,7 @@ for ivb = 1:numel(vars)
             correct = (ChoicesSubCond == 2 & Pr(sel,isub)>Pl(sel,isub))|(ChoicesSubCond == 1 & Pr(sel,isub)<Pl(sel,isub));
             corr_cond(ivb,ivg,isub,1:25) = correct;
             conf_cond(ivb,ivg,isub,1:25) =ConfSubCond;
-
+            RT_cond(ivb,ivg,isub,1:25) = RT(sel,isub);
 
             for imodel = whichmodels
                 pc2 = squeeze(p2_all(imodel, isub,sel));
@@ -160,11 +164,11 @@ options.families = {[1,2],[3:10]};
 
 %% Q vs Fleming vs SSAT
 options.families = {[1,2],[3:6],[7:10]};
-[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2,options) %% variance wins;
+[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC'/2,options) %% SSAT
 
 %% fleming vs SSAT
 options.families = {[1:4],[5:8]};
-[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC(:,3:10)'/2,options) %% fleming almost wins (ep = .94);
+[postBMCconf,outBMCconf] = VBA_groupBMC(-BIC(:,3:10)'/2,options) 
 
 %% fleming biased vs not
 options.families = {[1],[2:4]}

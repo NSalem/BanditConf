@@ -2,7 +2,7 @@ load('Results\model_fit_conf3.mat');
 figure()
 ip = 0;
 vars = [10,25];
-nmodel = 7;
+nmodel = 4;
 trlsel = 20:25;
 for ivb =1:2
     for ivg = 1:2
@@ -30,5 +30,11 @@ for ivb =1:2
        xlabel('R','Interpreter','latex')
        set(gca,'FontSize',12)
        text(0 ,0.90,[sprintf('d'' = %0.2f  ',dPrime),sprintf('d''_{Theoretic} = %0.2f',dPrimeReal)],'Units','normalized')
+        dPrimeAll(ivb,ivg) = dPrime;
+        dPrimeRealAll(ivb,ivg) = dPrimeReal;
     end
 end
+figure()
+plot(dPrimeAll(:))
+hold on
+% plot(dPrimeRealAll(:))
